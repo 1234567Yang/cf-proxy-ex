@@ -1,5 +1,5 @@
 # cf-reverse-proxy-ex
-Cloudflare super reverse proxy, setting up a free proxy by using Cloudflare worker. Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理，免翻代理。
+Cloudflare super reverse proxy, setting up a free proxy by using Cloudflare worker. Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
 
 # 在线体验
 https://y.demo.wvusd.homes/
