@@ -20,7 +20,7 @@ Cloudflare super reverse proxy, setting up a free proxy by using Cloudflare work
 * 域名购买：https://porkbun.com/  https://domain.com/<br >购买时可以Ctrl+F，搜素$0.
 
 # 基于原项目的改进
-* 去掉`/proxy/`，方便使用。
+* 去掉`/proxy/`，方便使用。我看到有issue说了，但是作者说想添加引导界面，这个问题我也解决了。
 * 手动处理转跳事件（3XX），防止一些相对资源加载不出来。
 * 判断欲代理的网址是否以`http`开头，如果不是就自动加上。
 * 把header里所有有关代理网址的信息全部换成要代理的网站的信息，防止某些网站阻止代理。
