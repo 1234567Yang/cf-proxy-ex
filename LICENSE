@@ -19,3 +19,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+其实我犹豫了很久要不要开源，因为之前的开源项目有被人拿去坑人，卖钱，但是又不想让人们重复造轮子，所以决定加入两个条件：
+* 凡是使用本项目建立的代理站点，务必备注此开源链接。
+* 禁止使用本项目盈利，包括基于本项目的项目。
+
+In fact, I hesitated for a long time whether to open source, because some people used the previous open source projects to cheat people and sell them for money, but I didn't want people to reinvent the wheel, so I decided to add two conditions:
+* Any proxy site established using this project must note this open source link.
+* It is forbidden to use this project for profit, including projects based on this project.
