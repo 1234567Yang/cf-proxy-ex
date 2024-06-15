@@ -137,7 +137,7 @@ const mainPage = `
 </head>
 <body>
   <h3 class="center">
-    I made this project because some extreme annoying network filter software in my school, which is notorious "Goguardian", and now it is open source at <a>https://github.com/1234567Yang/cf-reverse-proxy-ex/</a>.
+    I made this project because some extreme annoying network filter software in my school, which is notorious "Goguardian", and now it is open source at <a>https://github.com/1234567Yang/cf-proxy-ex/</a>.
   </h3>
   <br><br><br>
   <ul style="font-size:25;">
