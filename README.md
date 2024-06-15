@@ -25,7 +25,7 @@ Cloudflare reverse proxy, setting up a free proxy by using Cloudflare worker. Cl
 * 判断欲代理的网址是否以`http`开头，如果不是就自动加上。
 * 把header里所有有关代理网址的信息全部换成要代理的网站的信息，防止某些网站阻止代理。
 * 相对路径全部转换绝对路径，方便加载资源（如JS，CSS等）。
-* Cookie作用域修改成仅当代理那个网站时，防止Cookie太大服务器发来500 request，同时也可以防止一个敏感的Cookie被探测到导致整个网站无法使用，详细：https://github.com/gaboolic/cloudflare-reverse-proxy/issues/7 。
+* Cookie作用域修改成仅当代理那个网站时，防止Cookie太大服务器发来400 bad request，同时也可以防止一个敏感的Cookie被探测到导致整个网站无法使用，详细：https://github.com/gaboolic/cloudflare-reverse-proxy/issues/7 。
 * 把`XMLHttpRequest`和`fetch`注入返回的HTML，这样也可以提交表单数据。
 * 把一个文档监视器注入到返回的HTML，这样有新的链接也可以相对转绝对。
 * 修改`Content-Security-Policy`和`X-Frame-Options`的Header，实现可代理Duckduckgo，同时也解决了一些网站打不开的问题。
