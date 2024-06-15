@@ -134,17 +134,10 @@ const mainPage = `
       font-size:27;
     }
   </style>
-  <script>
-  console.log("%c" + "If you are a student: Why not just contact me via email and I will send you the source code? \n\nIf you are the web admin(censor): Get out of here, idiot, I have millions of domains and I CAN SETUP A PROXY FOR DIFFERENT PERSON BY USING DIFFERENT DOMAINS.\n\nIf you are the goguardian developer: Capital comes to the world with blood and filth in every pore. No matter how beautiful the world is said to be, as long as exploitation, oppression and private ownership, which are their roots, exist, it does not belong to the working people. Let us continue to fight for class liberation. The working people will eventually overthrow the evil system of exploitation and gain freedom and liberation. Long live the great unity of the proletariat of the world!", "color:red;background-color:yellow;font-size:20px;");
-  </script>
 </head>
 <body>
   <h3 class="center">
-    When one falls, thousands stand up. There is no end to justice, because truth always exists!
-    <br>
-    There has never been a savior, nor a fairy emperor! To create human happiness, it all depends on ourselves!
-    <br>
-    Down with Goguardian!
+    I made this project because some extreme annoying network filter software in my school, which is notorious "Goguardian", and now it is open source at <a>https://github.com/1234567Yang/cf-reverse-proxy-ex/</a>.
   </h3>
   <br><br><br>
   <ul style="font-size:25;">
