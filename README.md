@@ -12,9 +12,10 @@
 
 [💻 在线体验](#在线体验) &nbsp;| [⭐ 用法](#用法) &nbsp;| [🚀 快速开始](#快速开始) &nbsp;| [📈 基于原项目的改进](#基于原项目的改进) &nbsp;| [🔎 已知问题](#已知问题) &nbsp;| [📸 截图](#截图) &nbsp;| [📦 LICENSE](#license) &nbsp;| [📄 备注](#备注)
 
-Cloudflare super proxy, setting up a free proxy by using Cloudflare worker. 
-<br>
+
 Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
+<br>
+<!--本项目是一款基于Cloudflare worker的在线代理。目前支持100%加载Github，Duckduckgo，Stackoverflow等网站，并且和打开原网站毫无差别。和其它开源代理以及hide.me在线代理相比，本项目可以加载更多静态资源、实现Cookie作用域管理、提交表单、相对URL转绝对URL，转跳自动补全网址等强大的功能。-->
 <br>
 </div>
 
@@ -47,7 +48,7 @@ https://y.demo.wvusd.homes/
 * 判断欲代理的网址是否以`http`开头，如果不是就自动加上。
 * 把Header里所有有关代理网址的信息全部换成要代理的网站的信息，防止某些网站阻止代理。
 * 相对路径全部转换绝对路径，方便加载资源（如JS，CSS等）。
-* Cookie作用域修改成仅当代理那个网站时，防止Cookie太大服务器发来400 bad request，同时也可以防止一个敏感的Cookie被探测到导致整个网站无法使用，详细：https://github.com/gaboolic/cloudflare-reverse-proxy/issues/7 。
+* Cookie作用域修改成仅当代理那个网站时，防止Cookie太大服务器发来400 bad request，同时也防止恶意网站获取所有Cookie。
 * 把`XMLHttpRequest`和`fetch`注入返回的HTML，这样也可以提交表单数据。
 * 把一个文档监视器注入到返回的HTML，这样有新的链接也可以相对转绝对。
 * 修改`Content-Security-Policy`和`X-Frame-Options`的Header，实现可代理Duckduckgo，同时也解决了一些网站打不开的问题。
