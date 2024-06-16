@@ -1,7 +1,24 @@
-# cf-reverse-proxy-ex
-Cloudflare super proxy, setting up a free proxy by using Cloudflare worker. Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
+<div align="center">
 
-**各位给个Star方便以后找，别到时候找不到了。**
+# Cloudflare Proxy EX
+
+<!--[![GitHub license](https://img.shields.io/github/license/1234567Yang/cf-proxy-ex)](https://github.com/ViewFaceCore/ViewFaceCore/blob/main/LICENSE) &nbsp;&nbsp;-->
+
+![GitHub stars](https://img.shields.io/github/stars/1234567Yang/cf-proxy-ex?style=flat) &nbsp;&nbsp;
+![GitHub forks](https://img.shields.io/github/forks/1234567Yang/cf-proxy-ex)
+
+<br>
+
+—— [💻 在线体验](#在线体验) &nbsp;| [⭐ 用法](#用法) &nbsp;| [🚀 快速开始](#快速开始) &nbsp;| [📈 基于原项目的改进](#基于原项目的改进) &nbsp;| [🔎 已知问题](#已知问题) &nbsp;| [📸 截图](#截图) &nbsp;| [📦 LICENSE](#license) &nbsp;| [📄 备注](#备注) ——
+
+Cloudflare super proxy, setting up a free proxy by using Cloudflare worker. 
+<br>
+Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
+<br>
+[中文](https://github.com/1234567Yang/cf-proxy-ex) [English](https://github-com.translate.goog/1234567Yang/cf-proxy-ex?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_hl=zh-CN&_x_tr_pto=wapp)
+
+</div>
+
 
 # 在线体验
 https://y.demo.wvusd.homes/
@@ -11,7 +28,7 @@ https://y.demo.wvusd.homes/
 * 在任意网址前面加上https://你的域名/<br>例如https://你的域名/https://github.com
 * 本项目基于[gaboolic的cloudflare-reverse-proxy](https://github.com/gaboolic/cloudflare-reverse-proxy/)
 
-# 详细步骤
+# 快速开始
 * 登录https://www.cloudflare.com/
 * 创建应用程序![创建应用程序](img/1createapp.png)
 * 创建worker（pages麻烦一点，需要写一个package.json文件，但pages的好处是分配的域名直接可以用）![创建worker](img/2createworker.png)
@@ -20,9 +37,10 @@ https://y.demo.wvusd.homes/
 * 把worker.js文件中的内容复制进去，点"保存并部署"![保存并部署](img/5save.png)
 * (可选) 添加自定义域
 <br>
+
 * 免费域名申请：https://secure.nom.za/  https://nic.eu.org/   https://nic.ua
-* 不需要申请，link域名0元免费1年：dynadot.com
-* 域名购买：https://porkbun.com/  https://domain.com/<br >购买时可以Ctrl+F，搜素$0.
+* 不需要申请，link域名0元免费1年：https://dynadot.com/
+* 域名购买：https://porkbun.com/  https://domain.com/<br >购买时可以Ctrl + F，搜素`$0.`
 
 # 基于原项目的改进
 * 去掉`/proxy/`，方便使用。我看到有issue说了，但是作者说想添加引导界面，这个问题我也解决了。
@@ -35,12 +53,11 @@ https://y.demo.wvusd.homes/
 * 把一个文档监视器注入到返回的HTML，这样有新的链接也可以相对转绝对。
 * 修改`Content-Security-Policy`和`X-Frame-Options`的Header，实现可代理Duckduckgo，同时也解决了一些网站打不开的问题。
 * 在返回的时候，如果是HTML，那么添加`"Content-Type": "text/html; charset=utf-8"`，防止一些较为古老的中文网站打开出现`锟斤拷`，`烫烫烫`的问题。
+* 添加最后访问网址的Cookie，可以解决搜素引擎搜素之后出现异常的情况，如：`https://the proxy/https://www.duckduckgo.com/`会转到`https://the proxy/?q=key`。
 * 优化了一些代码。
 
 # 已知问题
 * 如果原界面同样重写了`XMLHttpRequest`和`fetch`（如Reddit），那么部分请求可能异常
-* ~~搜素Duckduckgo的时候提示出现Exception：在线代理的通病，因为JS它没有给我们一个监听`window.location.href`的方法，也就是说如果是JS转跳的话我是无法catch的，你需要手动再把网址打上。~~ <br> 天才！我用Cookie解决了！![image](https://github.com/1234567Yang/cf-proxy-ex/assets/113082249/301e9388-b6b5-4ca2-aa65-5ef17d685eb0)
-
 
 # 截图
 ![Duckduckgo](img/duckduckgo.jpg)
@@ -49,7 +66,6 @@ https://y.demo.wvusd.homes/
 ![Stackoverflow](img/stackoverflow.jpg)
 
 # LICENSE
-
 MIT License + 一些条件<br>
 其实我犹豫了很久要不要开源，因为之前的开源项目有被人拿去坑人，卖钱，但是又不想让人们重复造轮子，所以决定加入两个条件：
 * 凡是使用本项目建立的代理站点，务必备注此开源链接。
