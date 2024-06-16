@@ -28,7 +28,7 @@ https://y.demo.wvusd.homes/
 * 去掉`/proxy/`，方便使用。我看到有issue说了，但是作者说想添加引导界面，这个问题我也解决了。
 * 手动处理转跳事件（3XX），防止一些相对资源加载不出来。
 * 判断欲代理的网址是否以`http`开头，如果不是就自动加上。
-* 把header里所有有关代理网址的信息全部换成要代理的网站的信息，防止某些网站阻止代理。
+* 把Header里所有有关代理网址的信息全部换成要代理的网站的信息，防止某些网站阻止代理。
 * 相对路径全部转换绝对路径，方便加载资源（如JS，CSS等）。
 * Cookie作用域修改成仅当代理那个网站时，防止Cookie太大服务器发来400 bad request，同时也可以防止一个敏感的Cookie被探测到导致整个网站无法使用，详细：https://github.com/gaboolic/cloudflare-reverse-proxy/issues/7 。
 * 把`XMLHttpRequest`和`fetch`注入返回的HTML，这样也可以提交表单数据。
@@ -36,6 +36,10 @@ https://y.demo.wvusd.homes/
 * 修改`Content-Security-Policy`和`X-Frame-Options`的Header，实现可代理Duckduckgo，同时也解决了一些网站打不开的问题。
 * 在返回的时候，如果是HTML，那么添加`"Content-Type": "text/html; charset=utf-8"`，防止一些较为古老的中文网站打开出现`锟斤拷`，`烫烫烫`的问题。
 * 优化了一些代码。
+
+# 已知问题
+* 如果原界面同样重写了`XMLHttpRequest`和`fetch`（如Reddit），那么部分请求可能异常
+* 搜素Duckduckgo的时候提示出现Exception：在线代理的通病，因为JS它没有给我们一个监听`window.location.href`的方法，也就是说如果是JS转跳的话我是无法catch的，你需要手动再把网址打上。目前我可能想到了一个用last visited cookie来解决的思路，有空我会试试。
 
 # 截图
 ![Duckduckgo](img/duckduckgo.jpg)
