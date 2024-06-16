@@ -225,7 +225,7 @@ async function handleRequest(request) {
 
 
 
-  if (!actualUrlStr.includes("://")) { //从www.xxx.com转到https://www.xxx.com
+  if (!actualUrlStr.startsWith("http") && !actualUrlStr.includes("://")) { //从www.xxx.com转到https://www.xxx.com
     //actualUrlStr = "https://" + actualUrlStr;
     return Response.redirect(thisProxyServerUrlHttps + "https://" + actualUrlStr, 301);
   }
