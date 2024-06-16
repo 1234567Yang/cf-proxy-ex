@@ -1,13 +1,14 @@
 <div align="center">
+<h1>Cloudflare Proxy EX</h1>
 
-# Cloudflare Proxy EX
+[中文](https://github.com/1234567Yang/cf-proxy-ex) [English](https://github-com.translate.goog/1234567Yang/cf-proxy-ex?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_hl=zh-CN&_x_tr_pto=wapp)
+
+<br>
 
 <!--[![GitHub license](https://img.shields.io/github/license/1234567Yang/cf-proxy-ex)](https://github.com/ViewFaceCore/ViewFaceCore/blob/main/LICENSE) &nbsp;&nbsp;-->
 
 ![GitHub stars](https://img.shields.io/github/stars/1234567Yang/cf-proxy-ex?style=flat) &nbsp;&nbsp;
 ![GitHub forks](https://img.shields.io/github/forks/1234567Yang/cf-proxy-ex)
-
-<br>
 
 [💻 在线体验](#在线体验) &nbsp;| [⭐ 用法](#用法) &nbsp;| [🚀 快速开始](#快速开始) &nbsp;| [📈 基于原项目的改进](#基于原项目的改进) &nbsp;| [🔎 已知问题](#已知问题) &nbsp;| [📸 截图](#截图) &nbsp;| [📦 LICENSE](#license) &nbsp;| [📄 备注](#备注)
 
@@ -15,8 +16,6 @@ Cloudflare super proxy, setting up a free proxy by using Cloudflare worker.
 <br>
 Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
 <br>
-[中文](https://github.com/1234567Yang/cf-proxy-ex) [English](https://github-com.translate.goog/1234567Yang/cf-proxy-ex?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_hl=zh-CN&_x_tr_pto=wapp)
-
 </div>
 
 
