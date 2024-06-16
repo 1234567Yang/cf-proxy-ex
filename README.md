@@ -39,7 +39,8 @@ https://y.demo.wvusd.homes/
 
 # 已知问题
 * 如果原界面同样重写了`XMLHttpRequest`和`fetch`（如Reddit），那么部分请求可能异常
-* 搜素Duckduckgo的时候提示出现Exception：在线代理的通病，因为JS它没有给我们一个监听`window.location.href`的方法，也就是说如果是JS转跳的话我是无法catch的，你需要手动再把网址打上。目前我可能想到了一个用last visited cookie来解决的思路，有空我会试试。
+* ~~搜素Duckduckgo的时候提示出现Exception：在线代理的通病，因为JS它没有给我们一个监听`window.location.href`的方法，也就是说如果是JS转跳的话我是无法catch的，你需要手动再把网址打上。~~ <br> 天才！我用Cookie解决了！![image](https://github.com/1234567Yang/cf-proxy-ex/assets/113082249/301e9388-b6b5-4ca2-aa65-5ef17d685eb0)
+
 
 # 截图
 ![Duckduckgo](img/duckduckgo.jpg)
