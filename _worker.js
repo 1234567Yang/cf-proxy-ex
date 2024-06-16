@@ -9,6 +9,7 @@ addEventListener('fetch', event => {
 })
 
 const str = "/";
+const proxyCookie = "__PROXY_VISITEDSITE__";
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
 // const CSSReplace = ["https://", "http://"];
@@ -189,10 +190,41 @@ const redirectError = `
 
 async function handleRequest(request) {
   const url = new URL(request.url);
-  var actualUrlStr = url.pathname.substring(url.pathname.indexOf(str) + str.length) + url.search + url.hash
-  if (actualUrlStr == "") {
+  //var siteOnly = url.pathname.substring(url.pathname.indexOf(str) + str.length);
+
+  var actualUrlStr = url.pathname.substring(url.pathname.indexOf(str) + str.length) + url.search + url.hash;
+  if (actualUrlStr == "") { //先返回引导界面
     return getHTMLResponse(mainPage);
   }
+
+
+  try{
+    var test = actualUrlStr;
+    if(!test.startsWith("http")){
+      test = "https://" + test;
+    }
+    var u = new URL(test);
+    if(!u.host.includes(".")){
+      throw new Error();
+    }
+  }
+  catch{ //可能是搜素引擎，比如proxy.com/https://www.duckduckgo.com/ 转到 proxy.com/?q=key
+    var siteCookie = request.headers.get('Cookie');
+    var lastVisit;
+    if(siteCookie != null && siteCookie != ""){
+      lastVisit = getCook(proxyCookie, siteCookie);
+      console.log(lastVisit);
+      if(lastVisit != null && lastVisit != ""){
+        //(!lastVisit.startsWith("http"))?"https://":"" + 
+        //现在的actualUrlStr如果本来不带https:// 的话那么现在也不带，因为判断是否带protocol在后面
+        return Response.redirect(thisProxyServerUrlHttps + lastVisit + "/" + actualUrlStr, 301); 
+      }
+  }
+  return getHTMLResponse("Something is wrong while trying to get your cookie: <br> siteCookie: " + siteCookie + "<br>" + "lastSite: " + lastVisit);
+  }
+
+
+
   if (!actualUrlStr.includes("://")) { //从www.xxx.com转到https://www.xxx.com
     //actualUrlStr = "https://" + actualUrlStr;
     return Response.redirect(thisProxyServerUrlHttps + "https://" + actualUrlStr, 301);
@@ -274,13 +306,15 @@ async function handleRequest(request) {
           cookieHeaders.push({ headerName: key, headerValue: value });
       }
   }
+
+
   if (cookieHeaders.length > 0) {
       cookieHeaders.forEach(cookieHeader => {
           let cookies = cookieHeader.headerValue.split(',').map(cookie => cookie.trim());
           
           for (let i = 0; i < cookies.length; i++) {
               let parts = cookies[i].split(';').map(part => part.trim());
-              console.log(parts);
+              //console.log(parts);
               
               // Modify Path
               let pathIndex = parts.findIndex(part => part.toLowerCase().startsWith('path='));
@@ -312,6 +346,11 @@ async function handleRequest(request) {
           headers.set(cookieHeader.headerName, cookies.join(', '));
       });
   }
+  let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
+  //origin末尾不带/
+  //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
+  //origin: "https://www.baidu.com"
+  headers.append("Set-Cookie", cookieValue);
 
 
   // 添加允许跨域访问的响应头
@@ -320,6 +359,14 @@ async function handleRequest(request) {
   modifiedResponse.headers.set("X-Frame-Options", "");
 
   return modifiedResponse;
+}
+
+//https://stackoverflow.com/questions/5142337/read-a-javascript-cookie-by-name
+function getCook(cookiename, cookies) {
+  // Get name followed by anything except a semicolon
+  var cookiestring=RegExp(cookiename + "=[^;]+").exec(cookies);
+  // Return everything after the equal sign, or an empty string if the cookie name not found
+  return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
 }
 
 
