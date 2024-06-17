@@ -346,12 +346,13 @@ async function handleRequest(request) {
           headers.set(cookieHeader.headerName, cookies.join(', '));
       });
   }
-  let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
-  //origin末尾不带/
-  //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
-  //origin: "https://www.baidu.com"
-  headers.append("Set-Cookie", cookieValue);
-
+  if (bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+    let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
+    //origin末尾不带/
+    //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
+    //origin: "https://www.baidu.com"
+    headers.append("Set-Cookie", cookieValue);
+  }
 
   // 添加允许跨域访问的响应头
   modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
