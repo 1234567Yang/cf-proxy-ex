@@ -266,10 +266,11 @@ async function handleRequest(request) {
   }
 
   var modifiedResponse;
+  var bd;
   
   const contentType = response.headers.get("Content-Type");
   if (contentType && contentType.startsWith("text/")){
-    var bd = await response.text();
+    bd = await response.text();
 
 
     if (bd.includes("<html")) { //不加>因为html标签上可能加属性
@@ -346,7 +347,7 @@ async function handleRequest(request) {
           headers.set(cookieHeader.headerName, cookies.join(', '));
       });
   }
-  if (bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+  if (bd != null && bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
     let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
     //origin末尾不带/
     //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
