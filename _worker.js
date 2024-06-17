@@ -272,8 +272,8 @@ async function handleRequest(request) {
   if (contentType && contentType.startsWith("text/")){
     bd = await response.text();
 
-
-    if (bd.includes("<html")) { //不加>因为html标签上可能加属性
+//bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
+    if (contentType && contentType.includes("text/html")) {
       //console.log("STR" + actualUrlStr)
       bd = covToAbs(bd, actualUrlStr);
       bd = "<script>" + httpRequestInjection + "</script>" + bd;
@@ -347,7 +347,8 @@ async function handleRequest(request) {
           headers.set(cookieHeader.headerName, cookies.join(', '));
       });
   }
-  if (bd != null && bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+  //bd != null && bd.includes("<html")
+  if (contentType && contentType.includes("text/html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
     let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
     //origin末尾不带/
     //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
