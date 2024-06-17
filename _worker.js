@@ -382,14 +382,17 @@ function covToAbs(body, requestPathNow) {
         if (replace.length == 0) continue;
         var strReplace = replace[0];
         if (!strReplace.includes(thisProxyServerUrl_hostOnly)) {
-          var relativePath = strReplace.substring(match[1].toString().length, strReplace.length - 1); //-1因为右边的引号
-          if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")) {
-            try {
-              var absolutePath = thisProxyServerUrlHttps + new URL(relativePath, requestPathNow).href;
-              body = body.replace(strReplace, match[1].toString() + absolutePath + `"`);
-            } catch {
-              //可能是网站的href或者src设置错误
-              //无视
+          if(!strReplace.includes("*")){ //可能是正则匹配，如chat.bing.com中的<script>中有一段代码：u.replace(/href="[^"]*"/,'href…………
+            //TODO: 用更多方式判断是否是正则，欢迎PR
+            var relativePath = strReplace.substring(match[1].toString().length, strReplace.length - 1); //-1因为右边的引号
+            if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")) {
+              try {
+                var absolutePath = thisProxyServerUrlHttps + new URL(relativePath, requestPathNow).href;
+                body = body.replace(strReplace, match[1].toString() + absolutePath + `"`);
+              } catch {
+                //可能是网站的href或者src设置错误
+                //无视
+              }
             }
           }
         }
