@@ -21,7 +21,12 @@ Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
 
 
 # 在线体验
+### 首页
 https://y.demo.wvusd.homes/
+### Duckduckgo聊天
+https://y.demo.wvusd.homes/https://duckduckgo.com/?t=h_&q=hi&ia=chat
+### Google地图
+https://y.demo.wvusd.homes/https://www.google.com/maps
 
 # 用法
 * 在cloudflare网站中新建worker，把worker.js文件中的内容复制进去即可使用。
