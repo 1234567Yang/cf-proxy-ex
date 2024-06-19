@@ -100,17 +100,19 @@ function covToAbs(element){
   
     //new URL("a", "htpps://www.google.com/b").href;
   if(setAttr != "" && !relativePath.includes(base)){ //!relativePath.includes(nowlink)防止已经改变，因为有observer
-    if(!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")){
-      try{
-        var absolutePath = nowlink + new URL(relativePath, path).href;
-        element.setAttribute(setAttr, absolutePath);
-      }catch{
-        console.log(path + "   " + relativePath);
+    if(!relativePath.includes("*")){
+      if(!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")){
+        try{
+          // console.log(relativePath);
+          var absolutePath = nowlink + new URL(relativePath, path).href;
+          element.setAttribute(setAttr, absolutePath);
+        }catch{
+          console.log(path + "   " + relativePath);
+        }
       }
     }
   }
 }
-
 
 `;
 const mainPage = `
@@ -237,8 +239,7 @@ async function handleRequest(request) {
   for (var pair of request.headers.entries()) {
     //console.log(pair[0]+ ': '+ pair[1]);
     clientHeaderWithChange.set(pair[0], pair[1].replaceAll(thisProxyServerUrlHttps, actualUrlStr).replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host));
-  }
-  
+  }  
 
 
   const modifiedRequest = new Request(actualUrl, {
@@ -348,7 +349,7 @@ async function handleRequest(request) {
       });
   }
   //bd != null && bd.includes("<html")
-  if (contentType && contentType.includes("text/html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+  if (contentType && contentType.includes("text/html") && response.status == 200) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
     let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
     //origin末尾不带/
     //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
@@ -382,13 +383,17 @@ function covToAbs(body, requestPathNow) {
         if (replace.length == 0) continue;
         var strReplace = replace[0];
         if (!strReplace.includes(thisProxyServerUrl_hostOnly)) {
-          if(!strReplace.includes("*")){ //可能是正则匹配，如chat.bing.com中的<script>中有一段代码：u.replace(/href="[^"]*"/,'href…………
-            //TODO: 用更多方式判断是否是正则，欢迎PR
+          if(!isPosEmbed(body, replace.index)){
+            //可能是正则匹配，如chat.bing.com中的<script>中有一段代码：u.replace(/href="[^"]*"/,'href…………
+            //chat.bing.com中有typeof fbsrc!==i&&(c+="&src="+w(fbsrc))
             var relativePath = strReplace.substring(match[1].toString().length, strReplace.length - 1); //-1因为右边的引号
             if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")) {
               try {
                 var absolutePath = thisProxyServerUrlHttps + new URL(relativePath, requestPathNow).href;
-                body = body.replace(strReplace, match[1].toString() + absolutePath + `"`);
+                //body = body.replace(strReplace, match[1].toString() + absolutePath + `"`);
+                var beforeStr = body.slice(0, replace.index);
+                var afterStr = body.slice(replace.index + strReplace.length);
+                body = beforeStr + match[1].toString() + absolutePath + `"` + afterStr;
               } catch {
                 //可能是网站的href或者src设置错误
                 //无视
@@ -401,6 +406,41 @@ function covToAbs(body, requestPathNow) {
   }
 
   return body;
+}
+// console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",2));
+// VM195:1 false
+// undefined
+// console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",10));
+// VM207:1 false
+// undefined
+// console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",50));
+// VM222:1 true
+// undefined
+function isPosEmbed(html, pos){
+  if(pos > html.length || pos < 0) return false;
+  //取从前面`<`开始后面`>`结束，如果中间有任何`<`或者`>`的话，就是content
+  //<xx></xx><script>XXXXX[T]XXXXXXX</script><tt>XXXXX</tt>
+  //         |-------------X--------------|
+  //                !               !
+  //         conclusion: in content
+
+    // Find the position of the previous '<'
+    let start = html.lastIndexOf('<', pos);
+    if (start === -1) start = 0;
+  
+    // Find the position of the next '>'
+    let end = html.indexOf('>', pos);
+    if (end === -1) end = html.length;
+  
+    // Extract the substring between start and end
+    let content = html.slice(start, end + 1);
+  
+    // Check if there are any '<' or '>' within the substring (excluding the outer ones)
+    if (content.indexOf('<', 1) !== -1 || content.lastIndexOf('>') !== end) {
+      return true; // in content
+    }
+    return false;
+
 }
 function getHTMLResponse(html) {
   return new Response(html, {
