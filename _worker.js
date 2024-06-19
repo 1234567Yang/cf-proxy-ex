@@ -58,12 +58,29 @@ function inject(){
   };
 
   window.fetch = function(input, init) {
-    if(input.indexOf(base) == -1) input = nowlink + new URL(input, path).href;
-    console.log("R:" + input);
-    return originalFetch(input, init);
+    var url;
+    if (typeof input === 'string') {
+      url = input;
+    } else if (input instanceof Request) {
+      url = input.url;
+    } else {
+      url = input;
+    }
+  
+    if (url.indexOf(base) == -1) {
+      url = nowlink + new URL(url, path).href;
+    }
+    
+    console.log("R:" + url);
+    if (typeof input === 'string') {
+      return originalFetch(url, init);
+    } else {
+      const newRequest = new Request(url, input);
+      return originalFetch(newRequest, init);
+    }
   };
-  console.log("NETWROK REQUEST METHOD INJECTED");
-
+  
+  console.log("NETWORK REQUEST METHOD INJECTED");
 
 }
 
@@ -200,29 +217,29 @@ async function handleRequest(request) {
   }
 
 
-  try{
+  try {
     var test = actualUrlStr;
-    if(!test.startsWith("http")){
+    if (!test.startsWith("http")) {
       test = "https://" + test;
     }
     var u = new URL(test);
-    if(!u.host.includes(".")){
+    if (!u.host.includes(".")) {
       throw new Error();
     }
   }
-  catch{ //可能是搜素引擎，比如proxy.com/https://www.duckduckgo.com/ 转到 proxy.com/?q=key
+  catch { //可能是搜素引擎，比如proxy.com/https://www.duckduckgo.com/ 转到 proxy.com/?q=key
     var siteCookie = request.headers.get('Cookie');
     var lastVisit;
-    if(siteCookie != null && siteCookie != ""){
+    if (siteCookie != null && siteCookie != "") {
       lastVisit = getCook(proxyCookie, siteCookie);
       console.log(lastVisit);
-      if(lastVisit != null && lastVisit != ""){
+      if (lastVisit != null && lastVisit != "") {
         //(!lastVisit.startsWith("http"))?"https://":"" + 
         //现在的actualUrlStr如果本来不带https:// 的话那么现在也不带，因为判断是否带protocol在后面
-        return Response.redirect(thisProxyServerUrlHttps + lastVisit + "/" + actualUrlStr, 301); 
+        return Response.redirect(thisProxyServerUrlHttps + lastVisit + "/" + actualUrlStr, 301);
       }
-  }
-  return getHTMLResponse("Something is wrong while trying to get your cookie: <br> siteCookie: " + siteCookie + "<br>" + "lastSite: " + lastVisit);
+    }
+    return getHTMLResponse("Something is wrong while trying to get your cookie: <br> siteCookie: " + siteCookie + "<br>" + "lastSite: " + lastVisit);
   }
 
 
@@ -239,13 +256,20 @@ async function handleRequest(request) {
   for (var pair of request.headers.entries()) {
     //console.log(pair[0]+ ': '+ pair[1]);
     clientHeaderWithChange.set(pair[0], pair[1].replaceAll(thisProxyServerUrlHttps, actualUrlStr).replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host));
-  }  
+  }
 
+  let clientRequestBodyWithChange
+  if (request.body) {
+    clientRequestBodyWithChange = await request.text();
+    clientRequestBodyWithChange = clientRequestBodyWithChange
+      .replaceAll(thisProxyServerUrlHttps, actualUrlStr)
+      .replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host);
+  }
 
   const modifiedRequest = new Request(actualUrl, {
     headers: clientHeaderWithChange,
     method: request.method,
-    body: request.body,
+    body: (request.body) ? clientRequestBodyWithChange : request.body,
     //redirect: 'follow'
     redirect: "manual"
     //因为有时候会
@@ -268,12 +292,24 @@ async function handleRequest(request) {
 
   var modifiedResponse;
   var bd;
-  
+
   const contentType = response.headers.get("Content-Type");
-  if (contentType && contentType.startsWith("text/")){
+  if (contentType && contentType.startsWith("text/")) {
     bd = await response.text();
 
-//bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
+    //ChatGPT
+    let regex = new RegExp(`(?<!src="|href=")(https?:\\/\\/[^\s'"]+)`, 'g');
+    bd = bd.replace(regex, (match) => {
+      if (match.includes("http")) {
+        return thisProxyServerUrlHttps + match;
+      } else {
+        return thisProxyServerUrl_hostOnly + "/" + match;
+      }
+    });
+
+    console.log(bd); // 输出替换后的文本
+
+    //bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
     if (contentType && contentType.includes("text/html")) {
       //console.log("STR" + actualUrlStr)
       bd = covToAbs(bd, actualUrlStr);
@@ -290,8 +326,8 @@ async function handleRequest(request) {
     // }
     //console.log(bd);
 
-    modifiedResponse = new Response(bd, response);  
-  }else{
+    modifiedResponse = new Response(bd, response);
+  } else {
     var blob = await response.blob();
     modifiedResponse = new Response(blob, response);
   }
@@ -301,52 +337,52 @@ async function handleRequest(request) {
 
   let headers = modifiedResponse.headers;
   let cookieHeaders = [];
-  
+
   // Collect all 'Set-Cookie' headers regardless of case
   for (let [key, value] of headers.entries()) {
-      if (key.toLowerCase() == 'set-cookie') {
-          cookieHeaders.push({ headerName: key, headerValue: value });
-      }
+    if (key.toLowerCase() == 'set-cookie') {
+      cookieHeaders.push({ headerName: key, headerValue: value });
+    }
   }
 
 
   if (cookieHeaders.length > 0) {
-      cookieHeaders.forEach(cookieHeader => {
-          let cookies = cookieHeader.headerValue.split(',').map(cookie => cookie.trim());
-          
-          for (let i = 0; i < cookies.length; i++) {
-              let parts = cookies[i].split(';').map(part => part.trim());
-              //console.log(parts);
-              
-              // Modify Path
-              let pathIndex = parts.findIndex(part => part.toLowerCase().startsWith('path='));
-              let originalPath;
-              if (pathIndex !== -1) {
-                originalPath = parts[pathIndex].substring("path=".length);
-              }
-              let absolutePath = "/" + new URL(originalPath, actualUrlStr).href;;
-              
-              if (pathIndex !== -1) {
-                  parts[pathIndex] = `Path=${absolutePath}`;
-              } else {
-                  parts.push(`Path=${absolutePath}`);
-              }
-              
-              // Modify Domain
-              let domainIndex = parts.findIndex(part => part.toLowerCase().startsWith('domain='));
-              
-              if (domainIndex !== -1) {
-                  parts[domainIndex] = `domain=${thisProxyServerUrl_hostOnly}`;
-              } else {
-                  parts.push(`domain=${thisProxyServerUrl_hostOnly}`);
-              }
-              
-              cookies[i] = parts.join('; ');
-          }
-          
-          // Re-join cookies and set the header
-          headers.set(cookieHeader.headerName, cookies.join(', '));
-      });
+    cookieHeaders.forEach(cookieHeader => {
+      let cookies = cookieHeader.headerValue.split(',').map(cookie => cookie.trim());
+
+      for (let i = 0; i < cookies.length; i++) {
+        let parts = cookies[i].split(';').map(part => part.trim());
+        //console.log(parts);
+
+        // Modify Path
+        let pathIndex = parts.findIndex(part => part.toLowerCase().startsWith('path='));
+        let originalPath;
+        if (pathIndex !== -1) {
+          originalPath = parts[pathIndex].substring("path=".length);
+        }
+        let absolutePath = "/" + new URL(originalPath, actualUrlStr).href;;
+
+        if (pathIndex !== -1) {
+          parts[pathIndex] = `Path=${absolutePath}`;
+        } else {
+          parts.push(`Path=${absolutePath}`);
+        }
+
+        // Modify Domain
+        let domainIndex = parts.findIndex(part => part.toLowerCase().startsWith('domain='));
+
+        if (domainIndex !== -1) {
+          parts[domainIndex] = `domain=${thisProxyServerUrl_hostOnly}`;
+        } else {
+          parts.push(`domain=${thisProxyServerUrl_hostOnly}`);
+        }
+
+        cookies[i] = parts.join('; ');
+      }
+
+      // Re-join cookies and set the header
+      headers.set(cookieHeader.headerName, cookies.join(', '));
+    });
   }
   //bd != null && bd.includes("<html")
   if (contentType && contentType.includes("text/html") && response.status == 200) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
@@ -364,18 +400,23 @@ async function handleRequest(request) {
 
   return modifiedResponse;
 }
+function escapeRegExp(string) {
+  return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& 表示匹配的字符
+}
 
 //https://stackoverflow.com/questions/5142337/read-a-javascript-cookie-by-name
 function getCook(cookiename, cookies) {
   // Get name followed by anything except a semicolon
-  var cookiestring=RegExp(cookiename + "=[^;]+").exec(cookies);
+  var cookiestring = RegExp(cookiename + "=[^;]+").exec(cookies);
   // Return everything after the equal sign, or an empty string if the cookie name not found
-  return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
+  return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./, "") : "");
 }
-
 
 const matchList = [[/href=("|')([^"']*)("|')/g, `href="`], [/src=("|')([^"']*)("|')/g, `src="`]];
 function covToAbs(body, requestPathNow) {
+  var original = [];
+  var target = [];
+
   for (var match of matchList) {
     var setAttr = body.matchAll(match[0]);
     if (setAttr != null) {
@@ -383,20 +424,16 @@ function covToAbs(body, requestPathNow) {
         if (replace.length == 0) continue;
         var strReplace = replace[0];
         if (!strReplace.includes(thisProxyServerUrl_hostOnly)) {
-          if(!isPosEmbed(body, replace.index)){
-            //可能是正则匹配，如chat.bing.com中的<script>中有一段代码：u.replace(/href="[^"]*"/,'href…………
-            //chat.bing.com中有typeof fbsrc!==i&&(c+="&src="+w(fbsrc))
-            var relativePath = strReplace.substring(match[1].toString().length, strReplace.length - 1); //-1因为右边的引号
+          if (!isPosEmbed(body, replace.index)) {
+            var relativePath = strReplace.substring(match[1].toString().length, strReplace.length - 1);
             if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")) {
               try {
                 var absolutePath = thisProxyServerUrlHttps + new URL(relativePath, requestPathNow).href;
                 //body = body.replace(strReplace, match[1].toString() + absolutePath + `"`);
-                var beforeStr = body.slice(0, replace.index);
-                var afterStr = body.slice(replace.index + strReplace.length);
-                body = beforeStr + match[1].toString() + absolutePath + `"` + afterStr;
+                original.push(strReplace);
+                target.push(match[1].toString() + absolutePath + `"`);
               } catch {
-                //可能是网站的href或者src设置错误
-                //无视
+                // 无视
               }
             }
           }
@@ -404,42 +441,41 @@ function covToAbs(body, requestPathNow) {
       }
     }
   }
-
+  for (var i = 0; i < original.length; i++) {
+    body = body.replace(original[i], target[i]);
+  }
   return body;
 }
+
 // console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",2));
 // VM195:1 false
-// undefined
 // console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",10));
 // VM207:1 false
-// undefined
 // console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",50));
 // VM222:1 true
-// undefined
-function isPosEmbed(html, pos){
-  if(pos > html.length || pos < 0) return false;
+function isPosEmbed(html, pos) {
+  if (pos > html.length || pos < 0) return false;
   //取从前面`<`开始后面`>`结束，如果中间有任何`<`或者`>`的话，就是content
   //<xx></xx><script>XXXXX[T]XXXXXXX</script><tt>XXXXX</tt>
   //         |-------------X--------------|
   //                !               !
   //         conclusion: in content
 
-    // Find the position of the previous '<'
-    let start = html.lastIndexOf('<', pos);
-    if (start === -1) start = 0;
-  
-    // Find the position of the next '>'
-    let end = html.indexOf('>', pos);
-    if (end === -1) end = html.length;
-  
-    // Extract the substring between start and end
-    let content = html.slice(start, end + 1);
-  
-    // Check if there are any '<' or '>' within the substring (excluding the outer ones)
-    if (content.indexOf('<', 1) !== -1 || content.lastIndexOf('>') !== end) {
-      return true; // in content
-    }
-    return false;
+  // Find the position of the previous '<'
+  let start = html.lastIndexOf('<', pos);
+  if (start === -1) start = 0;
+
+  // Find the position of the next '>'
+  let end = html.indexOf('>', pos);
+  if (end === -1) end = html.length;
+
+  // Extract the substring between start and end
+  let content = html.slice(start + 1, end);
+  // Check if there are any '<' or '>' within the substring (excluding the outer ones)
+  if (content.includes(">") || content.includes("<")) {
+    return true; // in content
+  }
+  return false;
 
 }
 function getHTMLResponse(html) {
