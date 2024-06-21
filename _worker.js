@@ -30,63 +30,15 @@ var mainOnly = path.substring(0, path.indexOf("://")) + "://" + original_host + 
 
 
 
-inject();
 
 
-
-
-
-//add change listener - new link
-window.addEventListener('load', () => {
-  loopAndConvertToAbs();
-  // covScript();
-  console.log("CONVERTING SCRIPT PATH");
-  obsPage();
-});
-console.log("WINDOW ONLOAD EVENT ADDED");
-
-
-window.addEventListener('error', event => {
-  // 检查是否是 CORS 错误
-  if (event.message && event.message.includes('has been blocked by CORS policy')) {
-      console.log('CORS error detected:', event.message);
-
-      // event.target 是触发错误的元素
-      var element = event.target || event.srcElement;
-
-      // 确保是 script 元素
-      if (element.tagName === 'SCRIPT') {
-          console.log('Found problematic script:', element);
-
-          // 调用 covToAbs 函数
-          removeIntegrityAttributesFromElement(element);
-          covToAbs(element);
-
-          // 获取 script 元素的 outerHTML    script不会自动刷新资源
-          var outerHTML = element.outerHTML;
-
-          // 使用 outerHTML 创建新的 script 元素
-        var newScript = document.createElement('div');
-          newScript.innerHTML = outerHTML;
-          var clonedScript = newScript.firstChild;
-
-          // 添加新的 script 元素到 document
-          document.head.appendChild(clonedScript);
-
-          console.log('New script added:', clonedScript);
-      }
+function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
+  var scripts = document.getElementsByTagName('script');
+  for (var i = 0; i < scripts.length; i++) {
+    covToAbs(scripts[i]);
   }
-}, true);
-console.log("WINDOW CORS ERROR EVENT ADDED");
-
-
-// function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
-//   var scripts = document.getElementsByTagName('script');
-//   for (var i = 0; i < scripts.length; i++) {
-//     covToAbs(scripts[i]);
-//   }
-//     setTimeout(covScript, 3000);
-// }
+    setTimeout(covScript, 3000);
+}
 function loopAndConvertToAbs(){
   for(var ele of document.querySelectorAll('*')){
     removeIntegrityAttributesFromElement(ele);
@@ -238,6 +190,65 @@ function traverseAndConvert(node) {
     });
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+inject();
+
+
+
+
+//add change listener - new link
+window.addEventListener('load', () => {
+  loopAndConvertToAbs();
+  covScript();
+  console.log("CONVERTING SCRIPT PATH");
+  obsPage();
+});
+console.log("WINDOW ONLOAD EVENT ADDED");
+
+
+window.addEventListener('error', event => {
+  var element = event.target || event.srcElement;
+  if (element.tagName === 'SCRIPT') {
+    console.log('Found problematic script:', element);
+
+    // 调用 covToAbs 函数
+    removeIntegrityAttributesFromElement(element);
+    covToAbs(element);
+
+    // 创建新的 script 元素
+    var newScript = document.createElement('script');
+    newScript.src = element.src;
+    newScript.async = element.async; // 保留原有的 async 属性
+    newScript.defer = element.defer; // 保留原有的 defer 属性
+
+    // 添加新的 script 元素到 document
+    document.head.appendChild(newScript);
+
+    console.log('New script added:', newScript);
+  }
+}, true);
+console.log("WINDOW CORS ERROR EVENT ADDED");
+
+
+
+
+
 
 
 `;
@@ -496,7 +507,7 @@ async function handleRequest(request) {
     });
   }
   //bd != null && bd.includes("<html")
-  if (contentType && contentType.includes("text/html") && response.status == 200  && bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+  if (contentType && contentType.includes("text/html") && response.status == 200 && bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
     let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
     //origin末尾不带/
     //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
