@@ -386,8 +386,8 @@ async function handleRequest(request) {
 
   // 添加允许跨域访问的响应头
   modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
-  modifiedResponse.headers.set("Content-Security-Policy", "default-src *");
-  modifiedResponse.headers.set("X-Frame-Options", "");
+  modifiedResponse.headers.set("Content-Security-Policy", "default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; media-src *; frame-src *; font-src *; connect-src *; base-uri *; form-action *;");
+  modifiedResponse.headers.set("X-Frame-Options", "ALLOWALL");
 
   return modifiedResponse;
 }
