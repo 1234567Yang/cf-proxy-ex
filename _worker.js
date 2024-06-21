@@ -65,7 +65,7 @@ window.addEventListener('error', event => {
           var outerHTML = element.outerHTML;
 
           // 使用 outerHTML 创建新的 script 元素
-          var newScript = document.createElement('div');
+        var newScript = document.createElement('div');
           newScript.innerHTML = outerHTML;
           var clonedScript = newScript.firstChild;
 
@@ -410,7 +410,8 @@ async function handleRequest(request) {
     console.log(bd); // 输出替换后的文本
 
     //bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
-    if (contentType && contentType.includes("text/html")) {
+    //也需要加上这个方法因为有时候server返回json也是html
+    if (contentType && contentType.includes("text/html") && bd.includes("<html")) {
       //console.log("STR" + actualUrlStr)
       bd = covToAbs(bd, actualUrlStr);
       bd = "<script>" + httpRequestInjection + "</script>" + bd;
@@ -485,7 +486,7 @@ async function handleRequest(request) {
     });
   }
   //bd != null && bd.includes("<html")
-  if (contentType && contentType.includes("text/html") && response.status == 200) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+  if (contentType && contentType.includes("text/html") && response.status == 200  && bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
     let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
     //origin末尾不带/
     //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
