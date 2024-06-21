@@ -119,23 +119,39 @@ function inject(){
   console.log("NETWORK REQUEST METHOD INJECTED");
 
 }
+var elementList = [];
+var separateTime;
+var timer;
+const SEPARATE = 800;
 
-
-function obsPage(){
+function obsPage() {
   var yProxyObserver = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            covToAbs(mutation.target);
-            console.log(mutation.target);
-            
-        });
+    mutations.forEach(function(mutation) {
+      elementList.push(mutation.target);
+      separateTime = Date.now();
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(yProxyHookCheck, SEPARATE);
     });
+  });
   var config = { attributes: true, childList: true, subtree: true };
   yProxyObserver.observe(document.body, config);
 
   console.log("OBSERVING THE WEBPAGE...");
 }
 
-function covToAbs(element){
+function yProxyHookCheck() {
+  if (Date.now() - separateTime > SEPARATE - 10) {
+    console.log(elementList);
+    for (var ele of elementList) {
+      traverseAndConvert(ele);
+    }
+    elementList = [];
+  }
+}
+
+function covToAbs(element) {
   var relativePath = "";
   var setAttr = "";
   if (element instanceof HTMLElement && element.hasAttribute("href")) {
@@ -152,7 +168,8 @@ function covToAbs(element){
     if (!relativePath.includes("*")) {
       if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")) {
         try {
-          var absolutePath = nowlink + new URL(relativePath, path).href;
+          var absolutePath = new URL(relativePath, path).href;
+          absolutePath = nowlink + absolutePath;
           console.log(absolutePath);
           element.setAttribute(setAttr, absolutePath);
         } catch (e) {
@@ -162,6 +179,16 @@ function covToAbs(element){
     }
   }
 }
+
+function traverseAndConvert(node) {
+  if (node instanceof HTMLElement) {
+    covToAbs(node);
+    node.querySelectorAll('*').forEach(function(child) {
+      covToAbs(child);
+    });
+  }
+}
+
 
 `;
 const mainPage = `
