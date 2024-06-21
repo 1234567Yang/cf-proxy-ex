@@ -18,10 +18,14 @@ const httpRequestInjection = `
 //information
 var now = new URL(window.location.href);
 var path = now.pathname.substring(1);
+console.log("***************************----" + path);
 if(!path.startsWith("http")) path = "https://" + path;
 var base = now.host;
 var protocol = now.protocol;
 var nowlink = protocol + "//" + base + "/";
+var original_host = path.substring(path.indexOf("://") + "://".length);
+original_host = original_host.split('/')[0];
+var mainOnly = path.substring(0, path.indexOf("://")) + "://" + original_host + "/";
 
 
 
@@ -52,7 +56,24 @@ function inject(){
   var originalOpen = XMLHttpRequest.prototype.open;
   var originalFetch = window.fetch;
   XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-    if(url.indexOf(base) == -1) url = nowlink + new URL(url, path).href;
+    if(url.indexOf(nowlink) != 0){
+      var u = new URL(url, path).href;
+      u = u.replace(window.location.href, path);
+      u = u.replace(encodeURI(window.location.href), path);
+      u = u.replace(encodeURIComponent(window.location.href), path);
+
+      u = u.replace(nowlink, mainOnly);
+      u = u.replace(nowlink, encodeURI(mainOnly));
+      u = u.replace(nowlink, encodeURIComponent(mainOnly));
+      // mainOnly最后带/，要再替换一遍不带的
+      //反正是客户端执行，没人在乎那几毫秒，也没人在乎那0.01%的CPU占用。
+      u = u.replace(nowlink, mainOnly.substring(0,mainOnly.length - 1));
+      u = u.replace(nowlink, encodeURI(mainOnly.substring(0,mainOnly.length - 1)));
+      u = u.replace(nowlink, encodeURIComponent(mainOnly.substring(0,mainOnly.length - 1)));
+
+      u = u.replace(base, original_host);
+      url = nowlink + u;
+    }
     console.log("R:" + url);
     return originalOpen.apply(this, arguments);
   };
@@ -67,8 +88,23 @@ function inject(){
       url = input;
     }
   
-    if (url.indexOf(base) == -1) {
-      url = nowlink + new URL(url, path).href;
+    if (url.indexOf(nowlink) != 0) {
+      var u = new URL(url, path).href;
+      u = u.replace(window.location.href, path);
+      u = u.replace(encodeURI(window.location.href), path);
+      u = u.replace(encodeURIComponent(window.location.href), path);
+
+      u = u.replace(nowlink, mainOnly);
+      u = u.replace(nowlink, encodeURI(mainOnly));
+      u = u.replace(nowlink, encodeURIComponent(mainOnly));
+      // mainOnly最后带/，要再替换一遍不带的
+      //反正是客户端执行，没人在乎那几毫秒，也没人在乎那0.01%的CPU占用。
+      u = u.replace(nowlink, mainOnly.substring(0,mainOnly.length - 1));
+      u = u.replace(nowlink, encodeURI(mainOnly.substring(0,mainOnly.length - 1)));
+      u = u.replace(nowlink, encodeURIComponent(mainOnly.substring(0,mainOnly.length - 1)));
+
+      u = u.replace(base, original_host);
+      url = nowlink + u;
     }
     
     console.log("R:" + url);
@@ -86,14 +122,19 @@ function inject(){
 
 
 function obsPage(){
-  var yProxyObserver = new MutationObserver(elements => {
-      covToAbs(ele);
-  });
+  var yProxyObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            covToAbs(mutation.target);
+            console.log(mutation.target);
+            
+        });
+    });
   var config = { attributes: true, childList: true, subtree: true };
   yProxyObserver.observe(document.body, config);
 
   console.log("OBSERVING THE WEBPAGE...");
 }
+
 function covToAbs(element){
   var relativePath = "";
   var setAttr = "";
@@ -105,16 +146,16 @@ function covToAbs(element){
     relativePath = element.getAttribute("src");
     setAttr = "src";
   }
-  
-    //new URL("a", "htpps://www.google.com/b").href;
-  if(setAttr != "" && !relativePath.includes(base)){ //!relativePath.includes(nowlink)防止已经改变，因为有observer
-    if(!relativePath.includes("*")){
-      if(!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")){
-        try{
-          // console.log(relativePath);
+
+  // Check and update the attribute if necessary
+  if (setAttr !== "" && relativePath.indexOf(nowlink) != 0) { 
+    if (!relativePath.includes("*")) {
+      if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:")) {
+        try {
           var absolutePath = nowlink + new URL(relativePath, path).href;
+          console.log(absolutePath);
           element.setAttribute(setAttr, absolutePath);
-        }catch{
+        } catch (e) {
           console.log(path + "   " + relativePath);
         }
       }
@@ -386,7 +427,10 @@ async function handleRequest(request) {
 
   // 添加允许跨域访问的响应头
   modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
-  modifiedResponse.headers.set("Content-Security-Policy", "default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; media-src *; frame-src *; font-src *; connect-src *; base-uri *; form-action *;");
+  //modifiedResponse.headers.set("Content-Security-Policy", "default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; media-src *; frame-src *; font-src *; connect-src *; base-uri *; form-action *;");
+  if (modifiedResponse.headers.has("Content-Security-Policy")) {
+    modifiedResponse.headers.delete("Content-Security-Policy");
+  }
   modifiedResponse.headers.set("X-Frame-Options", "ALLOWALL");
 
   return modifiedResponse;
