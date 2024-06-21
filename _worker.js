@@ -39,12 +39,20 @@ inject();
 //add change listener - new link
 window.addEventListener('load', () => {
   loopAndConvertToAbs();
+  covScript();
+  console.log("CONVERTING SCRIPT PATH");
   obsPage();
 });
 console.log("WINDOW ONLOAD EVENT ADDED");
 
 
-
+function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
+  var scripts = document.getElementsByTagName('script');
+  for (var i = 0; i < scripts.length; i++) {
+    covToAbs(scripts[i]);
+  }
+    setTimeout(covScript, 3000);
+}
 function loopAndConvertToAbs(){
   for(var ele of document.querySelectorAll('*')){
     covToAbs(ele);
