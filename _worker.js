@@ -86,17 +86,8 @@ function inject(){
 
 
 function obsPage(){
-  var yProxyObserverTimeoutId;
-  var yProxyObserverEles = []; // 初始化 yProxyObserverEles 数组
   var yProxyObserver = new MutationObserver(elements => {
-    yProxyObserverEles = yProxyObserverEles.concat(elements);
-    clearTimeout(yProxyObserverTimeoutId);
-    yProxyObserverTimeoutId = setTimeout(() => {
-      for(var ele of yProxyObserverEles){
-          covToAbs(ele);
-      }
-      yProxyObserverEles = [];
-    }, 500);
+      covToAbs(ele);
   });
   var config = { attributes: true, childList: true, subtree: true };
   yProxyObserver.observe(document.body, config);
