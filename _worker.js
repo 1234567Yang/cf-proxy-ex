@@ -39,7 +39,7 @@ inject();
 //add change listener - new link
 window.addEventListener('load', () => {
   loopAndConvertToAbs();
-  covScript();
+  // covScript();
   console.log("CONVERTING SCRIPT PATH");
   obsPage();
 });
@@ -59,6 +59,7 @@ window.addEventListener('error', event => {
           console.log('Found problematic script:', element);
 
           // 调用 covToAbs 函数
+          removeIntegrityAttributesFromElement(element);
           covToAbs(element);
 
           // 获取 script 元素的 outerHTML    script不会自动刷新资源
@@ -79,15 +80,16 @@ window.addEventListener('error', event => {
 console.log("WINDOW CORS ERROR EVENT ADDED");
 
 
-function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
-  var scripts = document.getElementsByTagName('script');
-  for (var i = 0; i < scripts.length; i++) {
-    covToAbs(scripts[i]);
-  }
-    setTimeout(covScript, 3000);
-}
+// function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
+//   var scripts = document.getElementsByTagName('script');
+//   for (var i = 0; i < scripts.length; i++) {
+//     covToAbs(scripts[i]);
+//   }
+//     setTimeout(covScript, 3000);
+// }
 function loopAndConvertToAbs(){
   for(var ele of document.querySelectorAll('*')){
+    removeIntegrityAttributesFromElement(ele);
     covToAbs(ele);
   }
   console.log("LOOPED EVERY ELEMENT");
@@ -220,11 +222,18 @@ function covToAbs(element) {
     }
   }
 }
+function removeIntegrityAttributesFromElement(element){
+  if (element.hasAttribute('integrity')) {
+    element.removeAttribute('integrity');
+  }
+}
 
 function traverseAndConvert(node) {
   if (node instanceof HTMLElement) {
+    removeIntegrityAttributesFromElement(node);
     covToAbs(node);
     node.querySelectorAll('*').forEach(function(child) {
+      removeIntegrityAttributesFromElement(child);
       covToAbs(child);
     });
   }
@@ -414,6 +423,7 @@ async function handleRequest(request) {
     if (contentType && contentType.includes("text/html") && bd.includes("<html")) {
       //console.log("STR" + actualUrlStr)
       bd = covToAbs(bd, actualUrlStr);
+      bd = removeIntegrityAttributes(bd);
       bd = "<script>" + httpRequestInjection + "</script>" + bd;
     }
     //else{
@@ -552,6 +562,9 @@ function covToAbs(body, requestPathNow) {
     body = body.replace(original[i], target[i]);
   }
   return body;
+}
+function removeIntegrityAttributes(body) {
+  return body.replace(/integrity=("|')([^"']*)("|')/g, '');
 }
 
 // console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",2));
