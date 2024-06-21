@@ -458,6 +458,9 @@ async function handleRequest(request) {
   if (modifiedResponse.headers.has("Content-Security-Policy")) {
     modifiedResponse.headers.delete("Content-Security-Policy");
   }
+  if (modifiedResponse.headers.has("Permissions-Policy")) {
+    modifiedResponse.headers.delete("Permissions-Policy");
+  }
   modifiedResponse.headers.set("X-Frame-Options", "ALLOWALL");
 
   return modifiedResponse;
