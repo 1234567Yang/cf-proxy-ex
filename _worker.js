@@ -386,7 +386,7 @@ async function handleRequest(request) {
 
   // 添加允许跨域访问的响应头
   modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
-  modifiedResponse.headers.set("Content-Security-Policy", "");
+  modifiedResponse.headers.set("Content-Security-Policy", "default-src *");
   modifiedResponse.headers.set("X-Frame-Options", "");
 
   return modifiedResponse;
