@@ -7,7 +7,8 @@
 
 <!--[![GitHub license](https://img.shields.io/github/license/1234567Yang/cf-proxy-ex)](https://github.com/ViewFaceCore/ViewFaceCore/blob/main/LICENSE) &nbsp;&nbsp;-->
 
-![GitHub stars](https://img.shields.io/github/stars/1234567Yang/cf-proxy-ex?style=flat) &nbsp;&nbsp;
+![GitHub stars](https://img.shields.io/github/stars/1234567Yang/cf-proxy-ex?style=flat)
+[![Github Release](https://img.shields.io/github/v/release/1234567Yang/cf-proxy-ex)](https://github.com/1234567Yang/cf-proxy-ex/releases/latest)
 ![GitHub forks](https://img.shields.io/github/forks/1234567Yang/cf-proxy-ex)
 
 [💻 在线体验](#在线体验) &nbsp;| [⭐ 用法](#用法) &nbsp;| [🚀 快速开始](#快速开始) &nbsp;| [📈 基于原项目的改进](#基于原项目的改进) &nbsp;| [🔎 已知问题](#已知问题) &nbsp;| [📸 截图](#截图) &nbsp;| [📦 LICENSE](#license) &nbsp;| [📄 备注](#备注)
