@@ -161,7 +161,7 @@ function covToAbs(element) {
   // Check and update the attribute if necessary
   if (setAttr !== "" && relativePath.indexOf(nowlink) != 0) { 
     if (!relativePath.includes("*")) {
-      if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome-extension:")) {
+      if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome") && !relativePath.startsWith("edge")) {
         try {
           var absolutePath = new URL(relativePath, path).href;
           absolutePath = nowlink + absolutePath;
@@ -554,7 +554,7 @@ function covToAbs(body, requestPathNow) {
         if (!strReplace.includes(thisProxyServerUrl_hostOnly)) {
           if (!isPosEmbed(body, replace.index)) {
             var relativePath = strReplace.substring(match[1].toString().length, strReplace.length - 1);
-            if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome-extension:")) {
+            if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome") && !relativePath.startsWith("edge")) {
               try {
                 var absolutePath = thisProxyServerUrlHttps + new URL(relativePath, requestPathNow).href;
                 //body = body.replace(strReplace, match[1].toString() + absolutePath + `"`);
