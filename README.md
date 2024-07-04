@@ -23,7 +23,9 @@ Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
 
 # 在线体验
 
+<!--
 ## 听说CF开始删除反代worker账号，暂停使用
+-->
 
 ### 首页
 https://y.demo.wvusd.homes/
