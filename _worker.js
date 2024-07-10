@@ -10,6 +10,7 @@ addEventListener('fetch', event => {
 
 const str = "/";
 const proxyCookie = "__PROXY_VISITEDSITE__";
+const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
 // const CSSReplace = ["https://", "http://"];
@@ -17,58 +18,70 @@ const httpRequestInjection = `
 
 //information
 var now = new URL(window.location.href);
-var path = now.pathname.substring(1);
-console.log("***************************----" + path);
-if(!path.startsWith("http")) path = "https://" + path;
 var base = now.host;
 var protocol = now.protocol;
 var nowlink = protocol + "//" + base + "/";
+var oriUrlStr = window.location.href.substring(nowlink.length);
+var oriUrl = new URL(oriUrlStr);
+
+var path = now.pathname.substring(1);
+console.log("***************************----" + path);
+if(!path.startsWith("http")) path = "https://" + path;
+
 var original_host = path.substring(path.indexOf("://") + "://".length);
 original_host = original_host.split('/')[0];
 var mainOnly = path.substring(0, path.indexOf("://")) + "://" + original_host + "/";
 
 
-
-
-
-
-function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
-  var scripts = document.getElementsByTagName('script');
-  for (var i = 0; i < scripts.length; i++) {
-    covToAbs(scripts[i]);
+//*************************************************************************************************************
+function changeURL(relativePath){
+  try{
+    if(relativePath && relativePath.startsWith(nowlink)) relativePath = relativePath.substring(nowlink.length);
+    if(relativePath && relativePath.startsWith(base + "/")) relativePath = relativePath.substring(base.length + 1);
+    if(relativePath && relativePath.startsWith(base)) relativePath = relativePath.substring(base.length);
+  }catch{
+    //ignore
   }
-    setTimeout(covScript, 3000);
-}
-function loopAndConvertToAbs(){
-  for(var ele of document.querySelectorAll('*')){
-    removeIntegrityAttributesFromElement(ele);
-    covToAbs(ele);
+  try {
+    var absolutePath = new URL(relativePath, path).href;
+    absolutePath = absolutePath.replace(window.location.href, path);
+    absolutePath = absolutePath.replace(encodeURI(window.location.href), path);
+    absolutePath = absolutePath.replace(encodeURIComponent(window.location.href), path);
+
+    absolutePath = absolutePath.replace(nowlink, mainOnly);
+    absolutePath = absolutePath.replace(nowlink, encodeURI(mainOnly));
+    absolutePath = absolutePath.replace(nowlink, encodeURIComponent(mainOnly));
+
+
+      absolutePath = absolutePath.replace(nowlink, mainOnly.substring(0,mainOnly.length - 1));
+      absolutePath = absolutePath.replace(nowlink, encodeURI(mainOnly.substring(0,mainOnly.length - 1)));
+      absolutePath = absolutePath.replace(nowlink, encodeURIComponent(mainOnly.substring(0,mainOnly.length - 1)));
+
+      absolutePath = absolutePath.replace(base, original_host);
+
+    absolutePath = nowlink + absolutePath;
+    return absolutePath;
+  } catch (e) {
+    console.log(path + "   " + relativePath);
+    return "";
   }
-  console.log("LOOPED EVERY ELEMENT");
 }
-function inject(){
+//*************************************************************************************************************
+
+
+
+
+
+
+
+function networkInject(){
   //inject network request
   var originalOpen = XMLHttpRequest.prototype.open;
   var originalFetch = window.fetch;
   XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-    if(url.indexOf(nowlink) != 0){
-      var u = new URL(url, path).href;
-      u = u.replace(window.location.href, path);
-      u = u.replace(encodeURI(window.location.href), path);
-      u = u.replace(encodeURIComponent(window.location.href), path);
 
-      u = u.replace(nowlink, mainOnly);
-      u = u.replace(nowlink, encodeURI(mainOnly));
-      u = u.replace(nowlink, encodeURIComponent(mainOnly));
-      // mainOnly最后带/，要再替换一遍不带的
-      //反正是客户端执行，没人在乎那几毫秒，也没人在乎那0.01%的CPU占用。
-      u = u.replace(nowlink, mainOnly.substring(0,mainOnly.length - 1));
-      u = u.replace(nowlink, encodeURI(mainOnly.substring(0,mainOnly.length - 1)));
-      u = u.replace(nowlink, encodeURIComponent(mainOnly.substring(0,mainOnly.length - 1)));
-
-      u = u.replace(base, original_host);
-      url = nowlink + u;
-    }
+    url = changeURL(url);
+    
     console.log("R:" + url);
     return originalOpen.apply(this, arguments);
   };
@@ -82,26 +95,13 @@ function inject(){
     } else {
       url = input;
     }
-  
-    if (url.indexOf(nowlink) != 0) {
-      var u = new URL(url, path).href;
-      u = u.replace(window.location.href, path);
-      u = u.replace(encodeURI(window.location.href), path);
-      u = u.replace(encodeURIComponent(window.location.href), path);
 
-      u = u.replace(nowlink, mainOnly);
-      u = u.replace(nowlink, encodeURI(mainOnly));
-      u = u.replace(nowlink, encodeURIComponent(mainOnly));
-      // mainOnly最后带/，要再替换一遍不带的
-      //反正是客户端执行，没人在乎那几毫秒，也没人在乎那0.01%的CPU占用。
-      u = u.replace(nowlink, mainOnly.substring(0,mainOnly.length - 1));
-      u = u.replace(nowlink, encodeURI(mainOnly.substring(0,mainOnly.length - 1)));
-      u = u.replace(nowlink, encodeURIComponent(mainOnly.substring(0,mainOnly.length - 1)));
 
-      u = u.replace(base, original_host);
-      url = nowlink + u;
-    }
-    
+
+    url = changeURL(url);
+
+
+
     console.log("R:" + url);
     if (typeof input === 'string') {
       return originalFetch(url, init);
@@ -112,22 +112,213 @@ function inject(){
   };
   
   console.log("NETWORK REQUEST METHOD INJECTED");
-
 }
-var elementList = [];
-var separateTime;
-var timer;
-const SEPARATE = 800;
+
+
+
+function windowOpenInject(){
+  const originalOpen = window.open;
+
+  // Override window.open function
+  window.open = function (url, name, specs) {
+      let modifiedUrl = changeURL(url);
+      return originalOpen.call(window, modifiedUrl, name, specs);
+  };
+
+  console.log("WINDOW OPEN INJECTED");
+}
+
+
+//***********************************************************************************************
+class ProxyLocation {
+  constructor(originalLocation) {
+      this.originalLocation = originalLocation;
+  }
+
+  // 方法：重新加载页面
+  reload(forcedReload) {
+      this.originalLocation.reload(forcedReload);
+  }
+
+  // 方法：替换当前页面
+  replace(url) {
+      this.originalLocation.replace(changeURL(url));
+  }
+
+  // 方法：分配一个新的 URL
+  assign(url) {
+      this.originalLocation.assign(changeURL(url));
+  }
+
+  // 属性：获取和设置 href
+  get href() {
+      return oriUrlStr;
+  }
+
+  set href(url) {
+      this.originalLocation.href = changeURL(url);
+  }
+
+  // 属性：获取和设置 protocol
+  get protocol() {
+      return this.originalLocation.protocol;
+  }
+
+  set protocol(value) {
+      this.originalLocation.protocol = changeURL(value);
+  }
+
+  // 属性：获取和设置 host
+  get host() {
+    console.log("********************host");
+      return original_host;
+  }
+
+  set host(value) {
+    console.log("********************s host");
+      this.originalLocation.host = changeURL(value);
+  }
+
+  // 属性：获取和设置 hostname
+  get hostname() {
+    console.log("********************hostname");
+      return oriUrl.hostname;
+  }
+
+  set hostname(value) {
+    console.log("s hostname");
+      this.originalLocation.hostname = changeURL(value);
+  }
+
+  // 属性：获取和设置 port
+  get port() {
+    return oriUrl.port;
+  }
+
+  set port(value) {
+      this.originalLocation.port = value;
+  }
+
+  // 属性：获取和设置 pathname
+  get pathname() {
+    console.log("********************pathname");
+    return oriUrl.pathname;
+  }
+
+  set pathname(value) {
+    console.log("********************s pathname");
+      this.originalLocation.pathname = value;
+  }
+
+  // 属性：获取和设置 search
+  get search() {
+    console.log("********************search");
+    console.log(oriUrl.search);
+     return oriUrl.search;
+  }
+
+  set search(value) {
+    console.log("********************s search");
+      this.originalLocation.search = value;
+  }
+
+  // 属性：获取和设置 hash
+  get hash() {
+      return oriUrl.hash;
+  }
+
+  set hash(value) {
+      this.originalLocation.hash = value;
+  }
+
+  // 属性：获取 origin
+  get origin() {
+      return oriUrl.origin;
+  }
+}
+//********************************************************************************************
+
+
+
+function documentLocationInject(){
+  Object.defineProperty(document, 'URL', {
+    get: function () {
+        return oriUrlStr;
+    },
+    set: function (url) {
+        document.URL = changeURL(url);
+    }
+});
+
+Object.defineProperty(document, '${replaceUrlObj}', {
+      get: function () {
+          return new ProxyLocation(window.location);
+      },
+      set: function (url) {
+          window.location.href = changeURL(url);
+      }
+});
+console.log("LOCATION INJECTED");
+}
+
+
+
+
+
+function windowLocationInject() {
+
+  Object.defineProperty(window, '${replaceUrlObj}', {
+      get: function () {
+          return new ProxyLocation(window.location);
+      },
+      set: function (url) {
+          window.location.href = changeURL(url);
+      }
+  });
+
+  console.log("WINDOW LOCATION INJECTED");
+}
+
+
+
+
+
+
+
+
+
+
+function historyInject(){
+  const originalPushState = History.prototype.pushState;
+  const originalReplaceState = History.prototype.replaceState;
+
+  History.prototype.pushState = function (state, title, url) {
+    var u = new URL(url, now.href).href;
+    return originalPushState.apply(this, [state, title, u]);
+  };
+  History.prototype.replaceState = function (state, title, url) {
+    console.log("****************************************************************************")
+    console.log(nowlink);
+    console.log(url);
+    console.log(now.href);
+    var u = new URL(url, now.href).href;
+    console.log(u);
+    return originalReplaceState.apply(this, [state, title, u]);
+  };
+  console.log("HISTORY INJECTED");
+}
+
+
+
+
+
+
+//*************************************************************************************************************
 
 function obsPage() {
   var yProxyObserver = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
-      elementList.push(mutation.target);
-      separateTime = Date.now();
-      if (timer) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(yProxyHookCheck, SEPARATE);
+      traverseAndConvert(mutation);
     });
   });
   var config = { attributes: true, childList: true, subtree: true };
@@ -136,15 +327,17 @@ function obsPage() {
   console.log("OBSERVING THE WEBPAGE...");
 }
 
-function yProxyHookCheck() {
-  if (Date.now() - separateTime > SEPARATE - 10) {
-    console.log(elementList);
-    for (var ele of elementList) {
-      traverseAndConvert(ele);
-    }
-    elementList = [];
+function traverseAndConvert(node) {
+  if (node instanceof HTMLElement) {
+    removeIntegrityAttributesFromElement(node);
+    covToAbs(node);
+    node.querySelectorAll('*').forEach(function(child) {
+      removeIntegrityAttributesFromElement(child);
+      covToAbs(child);
+    });
   }
 }
+
 
 function covToAbs(element) {
   var relativePath = "";
@@ -163,8 +356,7 @@ function covToAbs(element) {
     if (!relativePath.includes("*")) {
       if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome") && !relativePath.startsWith("edge")) {
         try {
-          var absolutePath = new URL(relativePath, path).href;
-          absolutePath = nowlink + absolutePath;
+          var absolutePath = changeURL(relativePath);
           console.log(absolutePath);
           element.setAttribute(setAttr, absolutePath);
         } catch (e) {
@@ -179,18 +371,23 @@ function removeIntegrityAttributesFromElement(element){
     element.removeAttribute('integrity');
   }
 }
-
-function traverseAndConvert(node) {
-  if (node instanceof HTMLElement) {
-    removeIntegrityAttributesFromElement(node);
-    covToAbs(node);
-    node.querySelectorAll('*').forEach(function(child) {
-      removeIntegrityAttributesFromElement(child);
-      covToAbs(child);
-    });
+//*************************************************************************************************************
+function loopAndConvertToAbs(){
+  for(var ele of document.querySelectorAll('*')){
+    removeIntegrityAttributesFromElement(ele);
+    covToAbs(ele);
   }
+  console.log("LOOPED EVERY ELEMENT");
 }
 
+function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
+  var scripts = document.getElementsByTagName('script');
+  for (var i = 0; i < scripts.length; i++) {
+    covToAbs(scripts[i]);
+  }
+    setTimeout(covScript, 3000);
+}
+//*************************************************************************************************************
 
 
 
@@ -207,19 +404,41 @@ function traverseAndConvert(node) {
 
 
 
-inject();
 
 
 
 
-//add change listener - new link
+
+
+
+
+
+
+
+
+
+networkInject();
+windowOpenInject();
+documentLocationInject();
+windowLocationInject();
+// historyInject();
+// 这里实在无能为力不想改，可以pr一个
+
+
+
+
+
 window.addEventListener('load', () => {
   loopAndConvertToAbs();
-  covScript();
   console.log("CONVERTING SCRIPT PATH");
   obsPage();
+  covScript();
 });
 console.log("WINDOW ONLOAD EVENT ADDED");
+
+
+
+
 
 
 window.addEventListener('error', event => {
@@ -329,6 +548,9 @@ const redirectError = `
 
 async function handleRequest(request) {
   const url = new URL(request.url);
+  if(request.url.endsWith("favicon.ico")){
+    return Response.redirect("https://www.baidu.com/favicon.ico", 301);
+  }
   //var siteOnly = url.pathname.substring(url.pathname.indexOf(str) + str.length);
 
   var actualUrlStr = url.pathname.substring(url.pathname.indexOf(str) + str.length) + url.search + url.hash;
@@ -429,6 +651,10 @@ async function handleRequest(request) {
 
     console.log(bd); // 输出替换后的文本
 
+    if (contentType && (contentType.includes("text/html") || contentType.includes("text/javascript"))){
+      bd = bd.replace("window.location", "window." + replaceUrlObj);
+      bd = bd.replace("document.location", "document." + replaceUrlObj);
+    }
     //bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
     //也需要加上这个方法因为有时候server返回json也是html
     if (contentType && contentType.includes("text/html") && bd.includes("<html")) {
@@ -437,6 +663,7 @@ async function handleRequest(request) {
       bd = removeIntegrityAttributes(bd);
       bd = "<script>" + httpRequestInjection + "</script>" + bd;
     }
+
     //else{
     //   //const type = response.headers.get('Content-Type');type == null || (type.indexOf("image/") == -1 && type.indexOf("application/") == -1)
     //   if(actualUrlStr.includes(".css")){ //js不用，因为我已经把网络消息给注入了
