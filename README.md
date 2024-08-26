@@ -67,6 +67,9 @@ https://y.demo.wvusd.homes/https://www.google.com/maps
 * 添加最后访问网址的Cookie，可以解决搜素引擎搜素之后出现异常的情况，如：`https://the proxy/https://www.duckduckgo.com/`会转到`https://the proxy/?q=key`。
 * 优化了一些代码。
 
+# 安全密码
+安全密码利用Cookie每次请求如果有密码的情况下，会先检测是否有密码以及是否正确，如果不正确那么直接403。密码Cookie默认名称为`passwordCookieName`，设置密码可以代码里搜索`const password = "";`并替换成你的密码。
+
 # 已知问题
 * 如果原界面同样重写了`XMLHttpRequest`和`fetch`（如Reddit），那么部分请求可能异常
 
