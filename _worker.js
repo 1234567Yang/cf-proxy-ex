@@ -10,6 +10,8 @@ addEventListener('fetch', event => {
 
 const str = "/";
 const proxyCookie = "__PROXY_VISITEDSITE__";
+const passwordCookieName = "__PROXY_PWD__";
+const password = "";
 const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
@@ -547,6 +549,20 @@ const redirectError = `
 //new URL(请求路径, base路径).href;
 
 async function handleRequest(request) {
+  //获取所有cookie
+  var siteCookie = request.headers.get('Cookie');
+
+  
+  if (password != "" && siteCookie != null && siteCookie != "") {
+      var pwd = getCook(proxyCookie, passwordCookieName);
+      console.log(pwd);
+      if (pwd != null && pwd != "") {
+        if(pwd != password){
+          return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
+        }
+      }
+  }
+
   const url = new URL(request.url);
   if(request.url.endsWith("favicon.ico")){
     return Response.redirect("https://www.baidu.com/favicon.ico", 301);
@@ -570,7 +586,6 @@ async function handleRequest(request) {
     }
   }
   catch { //可能是搜素引擎，比如proxy.com/https://www.duckduckgo.com/ 转到 proxy.com/?q=key
-    var siteCookie = request.headers.get('Cookie');
     var lastVisit;
     if (siteCookie != null && siteCookie != "") {
       lastVisit = getCook(proxyCookie, siteCookie);
