@@ -11,7 +11,7 @@ addEventListener('fetch', event => {
 const str = "/";
 const proxyCookie = "__PROXY_VISITEDSITE__";
 const passwordCookieName = "__PROXY_PWD__";
-const password = "";
+const password = "1234";
 const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
@@ -553,14 +553,19 @@ async function handleRequest(request) {
   var siteCookie = request.headers.get('Cookie');
 
   
-  if (password != "" && siteCookie != null && siteCookie != "") {
-      var pwd = getCook(proxyCookie, passwordCookieName);
+  if (password != "") {
+    if(siteCookie != null && siteCookie != ""){
+      var pwd = getCook(passwordCookieName, siteCookie);
       console.log(pwd);
       if (pwd != null && pwd != "") {
         if(pwd != password){
           return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
         }
       }
+    }else{
+      return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
+    }
+
   }
 
   const url = new URL(request.url);
