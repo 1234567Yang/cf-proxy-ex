@@ -561,6 +561,8 @@ async function handleRequest(request) {
         if(pwd != password){
           return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
         }
+      }else{
+        return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
       }
     }else{
       return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
