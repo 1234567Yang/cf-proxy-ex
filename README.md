@@ -73,6 +73,8 @@ https://y.demo.wvusd.homes/https://www.google.com/maps
 
 # 已知问题
 * 如果原界面同样重写了`XMLHttpRequest`和`fetch`（如Reddit），那么部分请求可能异常
+* 这个项目目前代理不了youtube（403不知道是屏蔽了还是其他的东西做了Url验证）。但是遥遥领先的是大鹅的流量被屏蔽了，导致有一堆镜像站点（自己搜Invidious），经过测试这个镜像站点可以代理youtube。
+* 正在处理twitter代理，可能需要等几个周/月。
 
 # 截图
 ![Duckduckgo](img/duckduckgo.jpg)
