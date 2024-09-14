@@ -18,28 +18,31 @@ var thisProxyServerUrl_hostOnly;
 // const CSSReplace = ["https://", "http://"];
 const httpRequestInjection = `
 
+//---***========================================***---提示使用代理---***========================================***---
+// Function to get a cookie by name
 function getCookie(name) {
-  let matches = document.cookie.match(new RegExp(
-      "(?:^|; )" + name.replace(/([.$?*|{}()[]\\/+^])/g, '\\$1') + "=([^;]*)"
-  ));
-  return matches ? decodeURIComponent(matches[1]) : undefined;
+    let matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([.$?*|{}()\\[\\]\\/+^])/g, '\\$1') + "=([^;]*)"
+        //别问，要问就是ChatGPT
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
 // Function to set a cookie with expiration time in hours
 function setCookie(name, value, hours) {
-  let date = new Date();
-  date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
-  document.cookie = \`\${name}=\${encodeURIComponent(value)}; expires=\${date.toUTCString()}; path=/\`;
+    let date = new Date();
+    date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+    document.cookie = \`\${name}=\${encodeURIComponent(value)}; expires=\${date.toUTCString()}; path=/\`;
 }
 
 // Check if the cookie exists and show an alert if not
 if (!getCookie("__PROXY_HINT__")) {
-  alert(\`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}, please notice that you are using a proxy, and do not login to any website.\`);
-  setCookie("__PROXY_HINT__", "1", 48);
+    alert(\`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}. Please note that you are using a proxy, and do not log in to any website.\`);
+    setCookie("__PROXY_HINT__", "1", 48);
 }
 
 
-//information
+//---***========================================***---information---***========================================***---
 var now = new URL(window.location.href);
 var base = now.host;
 var protocol = now.protocol;
@@ -56,8 +59,9 @@ original_host = original_host.split('/')[0];
 var mainOnly = path.substring(0, path.indexOf("://")) + "://" + original_host + "/";
 
 
-//*************************************************************************************************************
+//---***========================================***---通用func---***========================================***---
 function changeURL(relativePath){
+  if(relativePath.startsWith("data:") || relativePath.startsWith("mailto:") || relativePath.startsWith("javascript:") || relativePath.startsWith("chrome") || relativePath.startsWith("edge")) return relativePath;
   try{
     if(relativePath && relativePath.startsWith(nowlink)) relativePath = relativePath.substring(nowlink.length);
     if(relativePath && relativePath.startsWith(base + "/")) relativePath = relativePath.substring(base.length + 1);
@@ -89,14 +93,11 @@ function changeURL(relativePath){
     return "";
   }
 }
-//*************************************************************************************************************
 
 
 
 
-
-
-
+//---***========================================***---注入网络---***========================================***---
 function networkInject(){
   //inject network request
   var originalOpen = XMLHttpRequest.prototype.open;
@@ -138,7 +139,7 @@ function networkInject(){
 }
 
 
-
+//---***========================================***---注入window.open---***========================================***---
 function windowOpenInject(){
   const originalOpen = window.open;
 
@@ -152,7 +153,27 @@ function windowOpenInject(){
 }
 
 
-//***********************************************************************************************
+//---***========================================***---注入append元素---***========================================***---
+function appendChildInject(){
+  const originalAppendChild = Node.prototype.appendChild;
+  Node.prototype.appendChild = function(child) {
+    try{
+      if(child.src){
+        child.src = changeURL(child.src);
+      }
+      if(child.href){
+        child.href = changeURL(child.href);
+      }
+    }catch{
+      //ignore
+    }
+    return originalAppendChild.call(this, child);
+};
+console.log("APPEND CHILD INJECTED");
+}
+
+
+//---***========================================***---注入location---***========================================***---
 class ProxyLocation {
   constructor(originalLocation) {
       this.originalLocation = originalLocation;
@@ -193,18 +214,18 @@ class ProxyLocation {
 
   // 属性：获取和设置 host
   get host() {
-    console.log("********************host");
+    console.log("*host");
       return original_host;
   }
 
   set host(value) {
-    console.log("********************s host");
+    console.log("*host");
       this.originalLocation.host = changeURL(value);
   }
 
   // 属性：获取和设置 hostname
   get hostname() {
-    console.log("********************hostname");
+    console.log("*hostname");
       return oriUrl.hostname;
   }
 
@@ -224,24 +245,24 @@ class ProxyLocation {
 
   // 属性：获取和设置 pathname
   get pathname() {
-    console.log("********************pathname");
+    console.log("*pathname");
     return oriUrl.pathname;
   }
 
   set pathname(value) {
-    console.log("********************s pathname");
+    console.log("*pathname");
       this.originalLocation.pathname = value;
   }
 
   // 属性：获取和设置 search
   get search() {
-    console.log("********************search");
+    console.log("*search");
     console.log(oriUrl.search);
      return oriUrl.search;
   }
 
   set search(value) {
-    console.log("********************s search");
+    console.log("*search");
       this.originalLocation.search = value;
   }
 
@@ -259,7 +280,6 @@ class ProxyLocation {
       return oriUrl.origin;
   }
 }
-//********************************************************************************************
 
 
 
@@ -286,8 +306,6 @@ console.log("LOCATION INJECTED");
 
 
 
-
-
 function windowLocationInject() {
 
   Object.defineProperty(window, '${replaceUrlObj}', {
@@ -310,7 +328,7 @@ function windowLocationInject() {
 
 
 
-
+//---***========================================***---注入历史---***========================================***---
 function historyInject(){
   const originalPushState = History.prototype.pushState;
   const originalReplaceState = History.prototype.replaceState;
@@ -320,7 +338,6 @@ function historyInject(){
     return originalPushState.apply(this, [state, title, u]);
   };
   History.prototype.replaceState = function (state, title, url) {
-    console.log("****************************************************************************")
     console.log(nowlink);
     console.log(url);
     console.log(now.href);
@@ -336,8 +353,7 @@ function historyInject(){
 
 
 
-//*************************************************************************************************************
-
+//---***========================================***---Hook观察界面---***========================================***---
 function obsPage() {
   var yProxyObserver = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
@@ -377,7 +393,6 @@ function covToAbs(element) {
   // Check and update the attribute if necessary
   if (setAttr !== "" && relativePath.indexOf(nowlink) != 0) { 
     if (!relativePath.includes("*")) {
-      if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome") && !relativePath.startsWith("edge")) {
         try {
           var absolutePath = changeURL(relativePath);
           console.log(absolutePath);
@@ -385,7 +400,6 @@ function covToAbs(element) {
         } catch (e) {
           console.log(path + "   " + relativePath);
         }
-      }
     }
   }
 }
@@ -394,7 +408,7 @@ function removeIntegrityAttributesFromElement(element){
     element.removeAttribute('integrity');
   }
 }
-//*************************************************************************************************************
+//---***========================================***---Hook观察界面里面要用到的func---***========================================***---
 function loopAndConvertToAbs(){
   for(var ele of document.querySelectorAll('*')){
     removeIntegrityAttributesFromElement(ele);
@@ -410,7 +424,6 @@ function covScript(){ //由于observer经过测试不会hook添加的script标�
   }
     setTimeout(covScript, 3000);
 }
-//*************************************************************************************************************
 
 
 
@@ -439,9 +452,10 @@ function covScript(){ //由于observer经过测试不会hook添加的script标�
 
 
 
-
+//---***========================================***---操作---***========================================***---
 networkInject();
 windowOpenInject();
+appendChildInject();
 documentLocationInject();
 windowLocationInject();
 // historyInject();
@@ -450,7 +464,7 @@ windowLocationInject();
 
 
 
-
+//---***========================================***---在window.load之后的操作---***========================================***---
 window.addEventListener('load', () => {
   loopAndConvertToAbs();
   console.log("CONVERTING SCRIPT PATH");
@@ -463,32 +477,34 @@ console.log("WINDOW ONLOAD EVENT ADDED");
 
 
 
+//---***========================================***---在window.error的时候---***========================================***---
 
 window.addEventListener('error', event => {
   var element = event.target || event.srcElement;
   if (element.tagName === 'SCRIPT') {
-    console.log('Found problematic script:', element);
-
+    console.log("Found problematic script:", element);
+    if(element.alreadyChanged){
+      console.log("this script has already been injected, ignoring this problematic script...");
+      return;
+    }
     // 调用 covToAbs 函数
     removeIntegrityAttributesFromElement(element);
     covToAbs(element);
 
     // 创建新的 script 元素
-    var newScript = document.createElement('script');
+    var newScript = document.createElement("script");
     newScript.src = element.src;
     newScript.async = element.async; // 保留原有的 async 属性
     newScript.defer = element.defer; // 保留原有的 defer 属性
+    newScript.alreadyChanged = true;
 
     // 添加新的 script 元素到 document
     document.head.appendChild(newScript);
 
-    console.log('New script added:', newScript);
+    console.log("New script added:", newScript);
   }
 }, true);
 console.log("WINDOW CORS ERROR EVENT ADDED");
-
-
-
 
 
 
@@ -824,7 +840,7 @@ function covToAbs(body, requestPathNow) {
         if (!strReplace.includes(thisProxyServerUrl_hostOnly)) {
           if (!isPosEmbed(body, replace.index)) {
             var relativePath = strReplace.substring(match[1].toString().length, strReplace.length - 1);
-            if (!relativePath.startsWith("data:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome") && !relativePath.startsWith("edge")) {
+            if (!relativePath.startsWith("data:") && !relativePath.startsWith("mailto:") && !relativePath.startsWith("javascript:") && !relativePath.startsWith("chrome") && !relativePath.startsWith("edge")) {
               try {
                 var absolutePath = thisProxyServerUrlHttps + new URL(relativePath, requestPathNow).href;
                 //body = body.replace(strReplace, match[1].toString() + absolutePath + `"`);
