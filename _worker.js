@@ -9,38 +9,36 @@ addEventListener('fetch', event => {
 })
 
 const str = "/";
-const proxyCookie = "__PROXY_VISITEDSITE__";
+const lastVisitProxyCookie = "__PROXY_VISITEDSITE__";
 const passwordCookieName = "__PROXY_PWD__";
+const proxyHintCookieName = "__PROXY_HINT__";
 const password = "";
 const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
 // const CSSReplace = ["https://", "http://"];
-const httpRequestInjection = `
-
+const proxyHintInjection = `
 //---***========================================***---提示使用代理---***========================================***---
-// Function to get a cookie by name
-function getCookie(name) {
-    let matches = document.cookie.match(new RegExp(
-        "(?:^|; )" + name.replace(/([.$?*|{}()\\[\\]\\/+^])/g, '\\$1') + "=([^;]*)"
-        //别问，要问就是ChatGPT
-    ));
-    return matches ? decodeURIComponent(matches[1]) : undefined;
-}
 
-// Function to set a cookie with expiration time in hours
-function setCookie(name, value, hours) {
-    let date = new Date();
-    date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
-    document.cookie = \`\${name}=\${encodeURIComponent(value)}; expires=\${date.toUTCString()}; path=/\`;
-}
-
-// Check if the cookie exists and show an alert if not
-if (!getCookie("__PROXY_HINT__")) {
+setTimeout(() => {
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    var hint = \`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}. Please note that you are using a proxy, and do not log in to any website. Click to close this hint. 警告：您当前正在使用网络代理，原始链接为\${window.location.pathname}。请注意您正在使用代理，请勿登录任何网站。单击关闭此提示。\`;
+    console.log(1);
+    document.body.insertAdjacentHTML(
+      'afterbegin', 
+      \`<div style="position:fixed;left:0px;top:0px;width:100%;margin:0px;padding:0px;z-index:9999999999999999999;user-select:none;cursor:pointer;" id="__PROXY_HINT_DIV__" onclick="document.getElementById('__PROXY_HINT_DIV__').remove();">
+        <span style="position:absolute;width:100%;min-height:30px;font-size:20px;color:yellow;background:red;text-align:center;border-radius:5px;">
+          \${hint}
+        </span>
+      </div>\`    
+    );
+  }else{
     alert(\`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}. Please note that you are using a proxy, and do not log in to any website.\`);
-    setCookie("__PROXY_HINT__", "1", 48);
-}
+  }
+}, 3000);
 
+`;
+const httpRequestInjection = `
 
 //---***========================================***---information---***========================================***---
 var now = new URL(window.location.href);
@@ -632,7 +630,7 @@ async function handleRequest(request) {
   catch { //可能是搜素引擎，比如proxy.com/https://www.duckduckgo.com/ 转到 proxy.com/?q=key
     var lastVisit;
     if (siteCookie != null && siteCookie != "") {
-      lastVisit = getCook(proxyCookie, siteCookie);
+      lastVisit = getCook(lastVisitProxyCookie, siteCookie);
       console.log(lastVisit);
       if (lastVisit != null && lastVisit != "") {
         //(!lastVisit.startsWith("http"))?"https://":"" + 
@@ -693,6 +691,7 @@ async function handleRequest(request) {
 
   var modifiedResponse;
   var bd;
+  var hasProxyHintCook = (getCook(proxyHintCookieName, siteCookie) != "");
 
   const contentType = response.headers.get("Content-Type");
   if (contentType && contentType.startsWith("text/")) {
@@ -720,7 +719,12 @@ async function handleRequest(request) {
       //console.log("STR" + actualUrlStr)
       bd = covToAbs(bd, actualUrlStr);
       bd = removeIntegrityAttributes(bd);
-      bd = "<script>" + httpRequestInjection + "</script>" + bd;
+      bd = 
+      "<script>" + 
+      ((!hasProxyHintCook)?proxyHintInjection:"") + 
+      httpRequestInjection + 
+      "</script>" + 
+      bd;
     }
 
     //else{
@@ -794,11 +798,20 @@ async function handleRequest(request) {
   }
   //bd != null && bd.includes("<html")
   if (contentType && contentType.includes("text/html") && response.status == 200 && bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
-    let cookieValue = proxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
+    let cookieValue = lastVisitProxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
     //origin末尾不带/
     //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
     //origin: "https://www.baidu.com"
     headers.append("Set-Cookie", cookieValue);
+    
+    if(!hasProxyHintCook){
+      //添加代理提示
+      const expiryDate = new Date();
+      expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24小时
+      var hintCookie = `${proxyHintCookieName}=1; expires=${expiryDate.toUTCString()}; path=/`;
+      headers.append("Set-Cookie", hintCookie);
+    }
+    
   }
 
   // 添加允许跨域访问的响应头
@@ -811,6 +824,11 @@ async function handleRequest(request) {
     modifiedResponse.headers.delete("Permissions-Policy");
   }
   modifiedResponse.headers.set("X-Frame-Options", "ALLOWALL");
+  if(!hasProxyHintCook){
+    //设置content立刻过期，防止多次弹代理警告（但是如果是Content-no-change还是会弹出）
+    modifiedResponse.headers.set("Cache-Control", "max-age=0");
+  }
+
 
   return modifiedResponse;
 }
