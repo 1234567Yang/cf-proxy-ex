@@ -18,6 +18,27 @@ var thisProxyServerUrl_hostOnly;
 // const CSSReplace = ["https://", "http://"];
 const httpRequestInjection = `
 
+function getCookie(name) {
+  let matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([.$?*|{}()[]\\/+^])/g, '\\$1') + "=([^;]*)"
+  ));
+  return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+// Function to set a cookie with expiration time in hours
+function setCookie(name, value, hours) {
+  let date = new Date();
+  date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+  document.cookie = \`\${name}=\${encodeURIComponent(value)}; expires=\${date.toUTCString()}; path=/\`;
+}
+
+// Check if the cookie exists and show an alert if not
+if (!getCookie("__PROXY_HINT__")) {
+  alert(\`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}, please make sure that you are using a proxy, and do not login to any website.\`);
+  setCookie("__PROXY_HINT__", "1", 48);
+}
+
+
 //information
 var now = new URL(window.location.href);
 var base = now.host;
