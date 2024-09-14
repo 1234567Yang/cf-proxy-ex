@@ -34,7 +34,7 @@ function setCookie(name, value, hours) {
 
 // Check if the cookie exists and show an alert if not
 if (!getCookie("__PROXY_HINT__")) {
-  alert(\`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}, please make sure that you are using a proxy, and do not login to any website.\`);
+  alert(\`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}, please notice that you are using a proxy, and do not login to any website.\`);
   setCookie("__PROXY_HINT__", "1", 48);
 }
 
