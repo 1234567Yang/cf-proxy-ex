@@ -604,6 +604,78 @@ const mainPage = `
 </body>
 </html>
 `;
+const pwPage = `
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Password Required</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div class="container">
+            <!-- 测试用卡片，确认功能正常可删除 -->
+            <div class="row">
+                <div class="col s12">
+                    <h4>Password Required</h4>
+                    <p>Please enter the password to access this page.</p>
+                    <div class="row">
+                        <div class="col s12">
+                          <div class="card red darken-4">
+                            <div class="card-content white-text">
+                              <span class="card-title">Caution</span>
+                              <p>Please check if this part is in the correct .domain.ltd format, if not, please change “.slice(-2)” in the definition of the variable cookieDomain. If you're not sure, here's another button to help you test.</p>
+                              <p id="cookie-domain"></p>
+                            </div>
+                            <div class="card-action">
+                                <button class="btn waves-effect waves-light orange accent-4" onclick="deleteAllCookies()">Delete Cookies</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            <!-- 卡片结束 -->
+            <div class="row">
+                <div class="col s12">
+                    <form id="pwForm" onsubmit="setPassword(event)">
+                        <div class="input-field">
+                            <input id="password" name="password" type="password" placeholder="Password" required>
+                        </div>
+                        <button class="btn waves-effect waves-light" type="submit">Submit
+                            <i class="material-icons right">send</i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script>
+            let cookieDomain = '.' + window.location.origin.split('.').slice(-2).join('.');
+            document.getElementById("cookie-domain").innerHTML = "cookieDomain: " + cookieDomain;
+            function deleteAllCookies() {
+                var cookies = document.cookie.split(";");
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i];
+                    var eqPos = cookie.indexOf("=");
+                    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + "=;" + "path=/; domain=" + cookieDomain+ "; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                }
+            }
+            function setPassword(event) {
+                event.preventDefault();
+                deleteAllCookies();
+                var password = document.getElementById('password').value.trim();
+                var currentOrigin = window.location.origin;
+                document.cookie += "__PROXY_PWD__=" + password + "; path=/; domain=" + cookieDomain;
+                window.location.href = currentOrigin + '/';
+            }
+        </script>
+    </body>
+</html>
+`;
 const redirectError = `
 <html><head></head><body><h2>Error while redirecting: the website you want to access to may contain wrong redirect information, and we can not parse the info</h2></body></html>
 `;
