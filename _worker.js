@@ -12,7 +12,8 @@ const str = "/";
 const lastVisitProxyCookie = "__PROXY_VISITEDSITE__";
 const passwordCookieName = "__PROXY_PWD__";
 const proxyHintCookieName = "__PROXY_HINT__";
-const password = "";
+const password = "123";
+const showPasswordPage = true;
 const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
@@ -510,11 +511,8 @@ console.log("WINDOW CORS ERROR EVENT ADDED");
 `;
 const mainPage = `
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet"> -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body{
       background:rgb(150,10,10);
@@ -604,76 +602,39 @@ const mainPage = `
 </body>
 </html>
 `;
-const pwPage = `
+const pwdPage = `
 <!DOCTYPE html>
-<html lang="en">
+<html>
+    
     <head>
-        <meta charset="UTF-8">
-        <title>Password Required</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div class="container">
-            <!-- 测试用卡片，确认功能正常可删除 -->
-            <div class="row">
-                <div class="col s12">
-                    <h4>Password Required</h4>
-                    <p>Please enter the password to access this page.</p>
-                    <div class="row">
-                        <div class="col s12">
-                          <div class="card red darken-4">
-                            <div class="card-content white-text">
-                              <span class="card-title">Caution</span>
-                              <p>Please check if this part is in the correct .domain.ltd format, if not, please change “.slice(-2)” in the definition of the variable cookieDomain. If you're not sure, here's another button to help you test.</p>
-                              <p id="cookie-domain"></p>
-                            </div>
-                            <div class="card-action">
-                                <button class="btn waves-effect waves-light orange accent-4" onclick="deleteAllCookies()">Delete Cookies</button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                </div>
-            </div>
-            <!-- 卡片结束 -->
-            <div class="row">
-                <div class="col s12">
-                    <form id="pwForm" onsubmit="setPassword(event)">
-                        <div class="input-field">
-                            <input id="password" name="password" type="password" placeholder="Password" required>
-                        </div>
-                        <button class="btn waves-effect waves-light" type="submit">Submit
-                            <i class="material-icons right">send</i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <script>
-            let cookieDomain = '.' + window.location.origin.split('.').slice(-2).join('.');
-            document.getElementById("cookie-domain").innerHTML = "cookieDomain: " + cookieDomain;
-            function deleteAllCookies() {
-                var cookies = document.cookie.split(";");
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i];
-                    var eqPos = cookie.indexOf("=");
-                    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                    document.cookie = name + "=;" + "path=/; domain=" + cookieDomain+ "; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            function setPassword() {
+                try {
+                    var cookieDomain = window.location.hostname;
+                    var password = document.getElementById('password').value;
+                    var currentOrigin = window.location.origin;
+                    var oneWeekLater = new Date();
+                    oneWeekLater.setTime(oneWeekLater.getTime() + (7 * 24 * 60 * 60 * 1000)); // 一周的毫秒数
+                    document.cookie = "${passwordCookieName}" + "=" + password + "; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + cookieDomain;
+                    document.cookie = "${passwordCookieName}" + "=" + password + "; expires=" + oneWeekLater.toUTCString() + "; path=/; domain=" + cookieDomain;
+                } catch(e) {
+                    alert(e.message);
                 }
-            }
-            function setPassword(event) {
-                event.preventDefault();
-                deleteAllCookies();
-                var password = document.getElementById('password').value.trim();
-                var currentOrigin = window.location.origin;
-                document.cookie += "__PROXY_PWD__=" + password + "; path=/; domain=" + cookieDomain;
-                window.location.href = currentOrigin + '/';
+                //window.location.href = currentOrigin + "?" + oneWeekLater.toUTCString();
+                location.reload();
             }
         </script>
+    </head>
+    
+    <body>
+        <div>
+            <input id="password" type="password" placeholder="Password">
+            <button onclick="setPassword()">
+                Submit
+            </button>
+        </div>
     </body>
+
 </html>
 `;
 const redirectError = `
@@ -693,13 +654,13 @@ async function handleRequest(request) {
       console.log(pwd);
       if (pwd != null && pwd != "") {
         if(pwd != password){
-          return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
+          return handleWrongPwd();
         }
       }else{
-        return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
+        return handleWrongPwd();
       }
     }else{
-      return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
+      return handleWrongPwd();
     }
 
   }
@@ -1011,6 +972,13 @@ function isPosEmbed(html, pos) {
   }
   return false;
 
+}
+function handleWrongPwd(){
+  if(showPasswordPage){
+    return getHTMLResponse(pwdPage);
+  }else{
+    return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
+  }
 }
 function getHTMLResponse(html) {
   return new Response(html, {
