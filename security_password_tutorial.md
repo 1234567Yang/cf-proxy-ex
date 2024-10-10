@@ -9,7 +9,10 @@
 ## 1：修改worker，`Ctrl + F`找到密码行
 ![密码](img/pwd_1.png)
 
-## 2：打开开发者工具（Dev tool），转到程序->Cookie->双击新建Cookie
+## 如果选择打开`showPwdPage`，那么可以直接输入密码（有效期1周），否则会显示403，需要按照以下方法操作
+默认打开`showPwdPage`
+
+## 打开开发者工具（Dev tool），转到程序->Cookie->双击新建Cookie
 ![Cookie](img/pwd_2.png)
 
 ### 如果想设置临时Cookie的话可以控制台（Console）输入：
