@@ -42,7 +42,7 @@ https://y.demo.wvusd.homes/https://www.google.com/maps
 # 快速开始
 * 登录https://www.cloudflare.com/
 * 创建应用程序![创建应用程序](img/1createapp.png)
-* 创建worker（pages麻烦一点，需要写一个package.json文件，但pages的好处是分配的域名直接可以用）![创建worker](img/2createworker.png)
+* 创建worker）![创建worker](img/2createworker.png)
 * 点"部署"按钮![创建worker](img/3deploy.png)
 * 编辑代码![编辑代码](img/4update.png)
 * 把worker.js文件中的内容复制进去，点"保存并部署"![保存并部署](img/5save.png)
