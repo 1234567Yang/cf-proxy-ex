@@ -669,6 +669,13 @@ async function handleRequest(request) {
   if(request.url.endsWith("favicon.ico")){
     return Response.redirect("https://www.baidu.com/favicon.ico", 301);
   }
+  if(request.url.endsWith("robots.txt")){
+    return getHTMLResponse(`
+User-Agent: *
+Disallow: /*
+Allow: /$
+`);
+  }
   //var siteOnly = url.pathname.substring(url.pathname.indexOf(str) + str.length);
 
   var actualUrlStr = url.pathname.substring(url.pathname.indexOf(str) + str.length) + url.search + url.hash;
