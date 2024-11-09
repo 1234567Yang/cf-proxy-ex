@@ -61,7 +61,11 @@ var mainOnly = path.substring(0, path.indexOf("://")) + "://" + original_host + 
 //---***========================================***---通用func---***========================================***---
 function changeURL(relativePath){
   if(relativePath == null) return null;
-  if(relativePath.startsWith("data:") || relativePath.startsWith("mailto:") || relativePath.startsWith("javascript:") || relativePath.startsWith("chrome") || relativePath.startsWith("edge")) return relativePath;
+  try{
+    if(relativePath.startsWith("data:") || relativePath.startsWith("mailto:") || relativePath.startsWith("javascript:") || relativePath.startsWith("chrome") || relativePath.startsWith("edge")) return relativePath;
+  }catch{
+    // duckduckgo mysterious BUG that will trigger sometimes, just ignore ...
+  }
   try{
     if(relativePath && relativePath.startsWith(nowlink)) relativePath = relativePath.substring(nowlink.length);
     if(relativePath && relativePath.startsWith(base + "/")) relativePath = relativePath.substring(base.length + 1);
