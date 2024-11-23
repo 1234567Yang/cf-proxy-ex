@@ -579,7 +579,7 @@ const mainPage = `
 </head>
 <body>
     <h3 class="center">
-        I made this project because some extreme annoying network filter software in my school, which is notorious "Goguardian", and now it is open source at <a>https://github.com/1234567Yang/cf-proxy-ex/</a>.
+        I made this project because some extreme annoying network filter software in my school, which is notorious "Goguardian", and now it is open source at <a href="https://github.com/1234567Yang/cf-proxy-ex/">https://github.com/1234567Yang/cf-proxy-ex/</a>.
       </h3>
       <br><br><br>
       <ul style="font-size:25;">
@@ -605,7 +605,7 @@ const mainPage = `
       <ul>
         <li>If your browser show 400 bad request, please clear your browser cookie<br></li>
         <li>Why I make this:<br> Because school blcok every website that I can find math / CS and other subjects' study material and question solutions. In the eyes of the school, China (and some other countries) seems to be outside the scope of this "world". They block access to server IP addresses in China and block access to Chinese search engines and video websites. Of course, some commonly used social software has also been blocked, which once made it impossible for me to send messages to my parents on campus. I don't think that's how it should be, so I'm going to fight it as hard as I can. I believe this will not only benefit myself, but a lot more people can get benefits.</li>
-       <li>If this website is blocked by your school: <br>Contact me at <a href="mailto:help@wvusd.homes">help@wvusd.homes</a>, and I will setup a new webpage.</li>
+       <li>If this website is blocked by your school: <br>Contact me at <a href="mailto:help@lhyang.org">help@lhyang.org</a>, and I will setup a new webpage.</li>
         <li>Limitation:<br>Although I tried my best to make every website proxiable, there still might be pages or resources that can not be load, and the most important part is that <span class="important">YOU SHOULD NEVER LOGIN ANY ACCOUNT VIA ONLINE PROXY</span>.</li>
       </ul>
 
