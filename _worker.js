@@ -839,8 +839,7 @@ Allow: /$
 
     modifiedResponse = new Response(bd, response);
   } else {
-    var blob = await response.blob();
-    modifiedResponse = new Response(blob, response);
+    modifiedResponse = new Response(response.body, response);
   }
 
 
