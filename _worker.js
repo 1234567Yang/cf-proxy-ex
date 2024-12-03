@@ -2,9 +2,6 @@ addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   thisProxyServerUrlHttps = `${url.protocol}//${url.hostname}/`;
   thisProxyServerUrl_hostOnly = url.host;
-  //console.log(thisProxyServerUrlHttps);
-  //console.log(thisProxyServerUrl_hostOnly);
-
   event.respondWith(handleRequest(event.request))
 })
 
