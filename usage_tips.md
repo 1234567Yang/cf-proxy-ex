@@ -9,4 +9,4 @@
 
 * 如果网站无法加载部分资源（如：Reddit），请到duckduckgo搜【网站名+"镜像站"】，大部分网址都会有镜像站。
   * 如：Reddit镜像站 / Youtube镜像站
-  * 英文用户请注意，因为某些原因，"mirror site (`镜像站`)"三个字使用中文搜索更容易搜到想要的结果。
+  * `For English user, I suggest to search Website name + "镜像站" (i.g. Youtube镜像站), and translate the result into English, because it is easier to find mirror sites via this way for some sort of reasons`
