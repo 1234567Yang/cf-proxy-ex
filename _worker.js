@@ -367,15 +367,20 @@ function historyInject(){
   const originalReplaceState = History.prototype.replaceState;
 
   History.prototype.pushState = function (state, title, url) {
+    if(url.startsWith("/" + oriUrl)) url = url.substring(("/" + oriUrl).length);
     var u = changeURL(url);
-    console.log("history pushState: " + u)
     return originalPushState.apply(this, [state, title, u]);
   };
 
   History.prototype.replaceState = function (state, title, url) {
-    console.log("history replaceState before: " + url)
+    
+    //这是给duckduckgo专门的补丁，可能是window.location字样做了加密，导致服务器无法替换。
+    //正常链接它要设置的history是/，改为proxy之后变为/https://duckduckgo.com。
+    //但是这种解决方案并没有从“根源”上解决问题
+    if(url.startsWith("/" + oriUrl)) url = url.substring(("/" + oriUrl).length);
+
+
     var u = changeURL(url);
-    console.log("history replaceState: " + u)
     return originalReplaceState.apply(this, [state, title, u]);
   };
 
