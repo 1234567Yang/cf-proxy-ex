@@ -198,59 +198,73 @@ class ProxyLocation {
       this.originalLocation = originalLocation;
   }
 
+  getStrNPosition(string, subString, index) {
+    return string.split(subString, index).join(subString).length;
+  }
+  getOriginalHref() {
+    return window.location.href.substring(this.getStrNPosition(window.location.href,"/",3)+1);
+  }
+
   // 方法：重新加载页面
   reload(forcedReload) {
-      this.originalLocation.reload(forcedReload);
+    this.originalLocation.reload(forcedReload);
   }
 
   // 方法：替换当前页面
   replace(url) {
-      this.originalLocation.replace(changeURL(url));
+    this.originalLocation.replace(changeURL(url));
   }
 
   // 方法：分配一个新的 URL
   assign(url) {
-      this.originalLocation.assign(changeURL(url));
+    this.originalLocation.assign(changeURL(url));
   }
 
   // 属性：获取和设置 href
   get href() {
-      return oriUrlStr;
+    return this.getOriginalHref();
   }
 
   set href(url) {
-      this.originalLocation.href = changeURL(url);
+    this.originalLocation.href = changeURL(url);
   }
 
   // 属性：获取和设置 protocol
   get protocol() {
-      return this.originalLocation.protocol;
+    return oriUrl.protocol;
   }
 
   set protocol(value) {
-      this.originalLocation.protocol = changeURL(value);
+    //if(!value.endsWith(":")) value += ":";
+    //console.log(nowlink + value + this.getOriginalHref().substring(this.getOriginalHref().indexOf(":") + 1));
+    //this.originalLocation.href = nowlink + value + this.getOriginalHref().substring(this.getOriginalHref().indexOf(":") + 1);
+    oriUrl.protocol = value;
+    window.location.href = nowlink + oriUrl.href;
   }
 
   // 属性：获取和设置 host
   get host() {
-    console.log("*host");
-      return original_host;
+    return oriUrl.host;
   }
 
   set host(value) {
-    console.log("*host");
-      this.originalLocation.host = changeURL(value);
+    //this.originalLocation.href = nowlink + this.getOriginalHref().substring(0,this.getOriginalHref().indexOf("//") + 2)+value+this.getOriginalHref().substring(this.getStrNPosition(this.getOriginalHref(), "/", 3));
+    //console.log(nowlink + oriUrl.protocol + "//" + value + oriUrl.pathname);
+    //this.originalLocation.href = nowlink + oriUrl.protocol + "//" + value + oriUrl.pathname;
+
+    oriUrl.host = value;
+    window.location.href = nowlink + oriUrl.href;
   }
 
   // 属性：获取和设置 hostname
   get hostname() {
-    console.log("*hostname");
-      return oriUrl.hostname;
+    return oriUrl.hostname;
   }
 
   set hostname(value) {
-    console.log("s hostname");
-      this.originalLocation.hostname = changeURL(value);
+    //this.originalLocation.href = nowlink + this.getOriginalHref().substring(0,this.getOriginalHref().indexOf("//") + 2)+value+this.getOriginalHref().substring(this.getStrNPosition(this.getOriginalHref(), "/", 3));
+    oriUrl.hostname = value;
+    window.location.href = nowlink + oriUrl.href;
   }
 
   // 属性：获取和设置 port
@@ -259,44 +273,44 @@ class ProxyLocation {
   }
 
   set port(value) {
-      this.originalLocation.port = value;
+    oriUrl.port = value;
+    window.location.href = nowlink + oriUrl.href;
   }
 
   // 属性：获取和设置 pathname
   get pathname() {
-    console.log("*pathname");
     return oriUrl.pathname;
   }
 
   set pathname(value) {
-    console.log("*pathname");
-      this.originalLocation.pathname = value;
+    oriUrl.pathname = value;
+    window.location.href = nowlink + oriUrl.href;
   }
 
   // 属性：获取和设置 search
   get search() {
-    console.log("*search");
-    console.log(oriUrl.search);
-     return oriUrl.search;
+    return oriUrl.search;
   }
 
   set search(value) {
-    console.log("*search");
-      this.originalLocation.search = value;
+    oriUrl.search = value;
+    window.location.href = nowlink + oriUrl.href;
   }
 
   // 属性：获取和设置 hash
   get hash() {
-      return oriUrl.hash;
+    return oriUrl.hash;
   }
 
   set hash(value) {
-      this.originalLocation.hash = value;
+    oriUrl.hash = value;
+    window.location.href = nowlink + oriUrl.href;
   }
 
   // 属性：获取 origin
+  //***********************************此处还需要修***********************************
   get origin() {
-      return oriUrl.origin;
+    return oriUrl.origin;
   }
 }
 
@@ -354,11 +368,14 @@ function historyInject(){
 
   History.prototype.pushState = function (state, title, url) {
     var u = changeURL(url);
+    console.log("history pushState: " + u)
     return originalPushState.apply(this, [state, title, u]);
   };
 
   History.prototype.replaceState = function (state, title, url) {
+    console.log("history replaceState before: " + url)
     var u = changeURL(url);
+    console.log("history replaceState: " + u)
     return originalReplaceState.apply(this, [state, title, u]);
   };
 
