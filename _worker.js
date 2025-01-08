@@ -774,12 +774,6 @@ Allow: /$
     return getHTMLResponse("Something is wrong while trying to get your cookie: <br> siteCookie: " + siteCookie + "<br>" + "lastSite: " + lastVisit);
   }
 
-/*
-If you see this line of code, please open an issue AND email me as provided in the main page, I want to see how "fast" people can find malicious code in open source project, send an email and I will thank you in the readme and give you a 15-day GlaDOS gift certificate
-如果你看到这行代码，请务必按照主页上提供的方式给我发电子邮件并且开启一个issue，我想看看所谓的开源，究竟有多少人在看代码，又有多快能在开源项目中发现恶意代码，发送邮件将在readme中感谢并赠送一个GlaDOS的15天礼券
-Because these emails often go into "spam", so please open an issue as well
-由于这些邮件经常被归类为“垃圾邮件”，因此请你也开个issue
-*/
 
   if (!actualUrlStr.startsWith("http") && !actualUrlStr.includes("://")) { //从www.xxx.com转到https://www.xxx.com
     //actualUrlStr = "https://" + actualUrlStr;
