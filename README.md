@@ -26,10 +26,8 @@ Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。
 
 # 在线体验
 
-由于赛博活佛被薅疼了，暂时无法体验。
+<!--由于赛博活佛被薅疼了，暂时无法体验。-->
 
-<!--
-旧地址域名即将过期，请更新为以下域名。去你*的第二年域名续费这么贵！
 
 ### 首页
 https://y.demo.lhyang.org/
@@ -37,7 +35,7 @@ https://y.demo.lhyang.org/
 https://y.demo.lhyang.org/https://duckduckgo.com/?t=h_&q=hi&ia=chat
 ### Google地图
 https://y.demo.lhyang.org/https://www.google.com/maps
--->
+
 
 # 用法
 * 在cloudflare网站中新建worker，把worker.js文件中的内容复制进去即可使用。
