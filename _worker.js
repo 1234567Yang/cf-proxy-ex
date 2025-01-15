@@ -384,10 +384,11 @@ function historyInject(){
     //这是给duckduckgo专门的补丁，可能是window.location字样做了加密，导致服务器无法替换。
     //正常链接它要设置的history是/，改为proxy之后变为/https://duckduckgo.com。
     //但是这种解决方案并没有从“根源”上解决问题
-    //console.log("History url standard: " + url);
-    //console.log("History url compare" + "/" + oriUrl);
-    if(url.startsWith("/" + oriUrl)) url = url.substring(("/" + oriUrl).length);
 
+    if(url.startsWith("/" + oriUrl.href)) url = url.substring(("/" + oriUrl.href).length); // https://example.com/
+    if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1))) url = url.substring(("/" + oriUrl.href.substring(0, oriUrl.href.length - 1)).length); // https://example.com (没有/在最后)
+    // console.log("History url standard: " + url);
+    // console.log("History url changed" + changeURL(url));
 
     var u = changeURL(url);
     return originalReplaceState.apply(this, [state, title, u]);
@@ -407,7 +408,6 @@ function historyInject(){
 
   console.log("HISTORY INJECTED");
 }
-
 
 
 
