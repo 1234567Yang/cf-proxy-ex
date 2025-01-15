@@ -17,7 +17,7 @@
 
 ### 如果想设置临时Cookie的话可以控制台（Console）输入：
 `document.cookie += "__PROXY_PWD__=your_password; path=/; domain=your_domain`
-注意替换`your_password`和`your_domain`。感谢@brightu 分享。
+注意替换`your_password`和`your_domain`。
 
 ## Cookie名称是在密码附近可以找到的
 ![Cookie](img/pwd_3.png)
