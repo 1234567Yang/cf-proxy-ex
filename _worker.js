@@ -649,7 +649,7 @@ const mainPage = `
         <br><br>
         <a href="https://v2rayn.org/">v2RayN</a><span> is a GUI client for Windows, support Xray core and v2fly core and others. You must subscribe to an <a href = "https://aijichang.org/6190/">airport</a> to use it. For example, you can subscribe <a href="https://feiniaoyun.xyz/">fly bird cloud</a>.</span>
         <br><br>
-        <span>Bypass <del>Goguardian</del> by proxy: You can buy a domain($1) and setup by yourself: </span><a href="https://github.com/gaboolic/cloudflare-reverse-proxy">how to setup a proxy</a><span>. Unless <del>Goguardian</del> use white list mode, this can always work.</span>
+        <span>Bypass <del>Goguardian</del> by proxy: You can buy a domain($1) and setup by yourself: </span><a href="https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md">how to setup a proxy</a><span>. Unless <del>Goguardian</del> use white list mode, this can always work.</span>
         <br>
         <span>Too expensive? Never mind! There are a lot of free domains registration companies (for the first year of the domain) that do not need any credit card, search online!</span>
         <br><br>
