@@ -3,8 +3,13 @@
 
 
 * 登录https://www.cloudflare.com/
-* 创建应用程序![创建应用程序](img/1createapp.png)
-* 创建worker）![创建worker](img/2createworker.png)
-* 点"部署"按钮![创建worker](img/3deploy.png)
-* 编辑代码![编辑代码](img/4update.png)
-* 把worker.js文件中的内容复制进去，点"保存并部署"![保存并部署](img/5save.png)
+* 创建应用程序
+![创建应用程序](img/1createapp.png)
+* 创建worker
+![创建worker](img/2createworker.png)
+* 点"部署"按钮
+![点击部署按钮](img/3deploy.png)
+* 编辑代码
+![编辑代码](img/4update.png)
+* 把worker.js文件中的内容复制进去，点"保存并部署"
+![保存并部署](img/5save.png)
