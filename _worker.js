@@ -5,11 +5,12 @@ addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
 })
 
+
 const str = "/";
 const lastVisitProxyCookie = "__PROXY_VISITEDSITE__";
 const passwordCookieName = "__PROXY_PWD__";
 const proxyHintCookieName = "__PROXY_HINT__";
-const password = "";
+const password = "qwerty1";
 const showPasswordPage = true;
 const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
@@ -40,19 +41,19 @@ const httpRequestInjection = `
 
 //---***========================================***---information---***========================================***---
 var now = new URL(window.location.href);
-var base = now.host;
-var protocol = now.protocol;
-var nowlink = protocol + "//" + base + "/";
-var oriUrlStr = window.location.href.substring(nowlink.length);
+var base = now.host; //代理的base - proxy.com
+var protocol = now.protocol; //代理的protocol
+var nowlink = protocol + "//" + base + "/"; //代理前缀 https://proxy.com/
+var oriUrlStr = window.location.href.substring(nowlink.length); //如：https://example.com/1?q#1
 var oriUrl = new URL(oriUrlStr);
 
 var path = now.pathname.substring(1);
-console.log("***************************----" + path);
+//console.log("***************************----" + path);
 if(!path.startsWith("http")) path = "https://" + path;
 
-var original_host = path.substring(path.indexOf("://") + "://".length);
+var original_host = oriUrlStr.substring(oriUrlStr.indexOf("://") + "://".length);
 original_host = original_host.split('/')[0];
-var mainOnly = path.substring(0, path.indexOf("://")) + "://" + original_host + "/";
+var mainOnly = oriUrlStr.substring(0, oriUrlStr.indexOf("://")) + "://" + original_host + "/";
 
 
 //---***========================================***---通用func---***========================================***---
@@ -71,7 +72,7 @@ function changeURL(relativePath){
     //ignore
   }
   try {
-    var absolutePath = new URL(relativePath, path).href;
+    var absolutePath = new URL(relativePath, oriUrlStr).href;
     absolutePath = absolutePath.replace(window.location.href, path);
     absolutePath = absolutePath.replace(encodeURI(window.location.href), path);
     absolutePath = absolutePath.replace(encodeURIComponent(window.location.href), path);
@@ -90,7 +91,7 @@ function changeURL(relativePath){
     absolutePath = nowlink + absolutePath;
     return absolutePath;
   } catch (e) {
-    console.log("Exception occured: " + e.message + path + "   " + relativePath);
+    console.log("Exception occured: " + e.message + oriUrlStr + "   " + relativePath);
     return "";
   }
 }
@@ -370,7 +371,8 @@ function historyInject(){
     if(!url) return; //x.com 会有一次undefined
 
 
-    if(url.startsWith("/" + oriUrl)) url = url.substring(("/" + oriUrl).length);
+    if(url.startsWith("/" + oriUrl.href)) url = url.substring(("/" + oriUrl.href).length); // https://example.com/
+    if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1))) url = url.substring(("/" + oriUrl.href).length - 1); // https://example.com (没有/在最后)
 
     
     var u = changeURL(url);
@@ -386,9 +388,9 @@ function historyInject(){
     //但是这种解决方案并没有从“根源”上解决问题
 
     if(url.startsWith("/" + oriUrl.href)) url = url.substring(("/" + oriUrl.href).length); // https://example.com/
-    if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1))) url = url.substring(("/" + oriUrl.href.substring(0, oriUrl.href.length - 1)).length); // https://example.com (没有/在最后)
-    // console.log("History url standard: " + url);
-    // console.log("History url changed" + changeURL(url));
+    if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1))) url = url.substring(("/" + oriUrl.href).length - 1); // https://example.com (没有/在最后)
+    //console.log("History url standard: " + url);
+    //console.log("History url changed: " + changeURL(url));
 
     var u = changeURL(url);
     return originalReplaceState.apply(this, [state, title, u]);
@@ -408,6 +410,7 @@ function historyInject(){
 
   console.log("HISTORY INJECTED");
 }
+
 
 
 
