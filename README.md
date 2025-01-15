@@ -43,12 +43,7 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 * 本项目基于[gaboolic的cloudflare-reverse-proxy](https://github.com/gaboolic/cloudflare-reverse-proxy/)
 
 # 快速开始
-* 登录https://www.cloudflare.com/
-* 创建应用程序![创建应用程序](img/1createapp.png)
-* 创建worker）![创建worker](img/2createworker.png)
-* 点"部署"按钮![创建worker](img/3deploy.png)
-* 编辑代码![编辑代码](img/4update.png)
-* 把worker.js文件中的内容复制进去，点"保存并部署"![保存并部署](img/5save.png)
+
 * (可选) 添加自定义域
 <br>
 
