@@ -92,12 +92,12 @@ MIT License + 一些条件<br>
 > [!NOTE]  
 > 由于人数众多，我只能选取几个具有代表性的在这里特别提及，~~当然了你也可以要求我把你加进来~~。如果您出现在这里，并且希望被移除，请提交Issue（我会移除名字后，一并删除Issue）。
 
+* 感谢 @04041b 发现了几个BUG，并告诉我在线代理这个思路。
 * 本项目基于[gaboolic的cloudflare-reverse-proxy](https://github.com/gaboolic/cloudflare-reverse-proxy/)，感谢gaboolic给我提供相关在Cloudflare部署的实现思路。
 * 感谢所有提交issue，提交PR的朋友帮助改进本项目。
 * 感谢 @brightu 分享了一个非常实用的添加Cookie的方式，详情请见 https://github.com/1234567Yang/cf-proxy-ex/issues/15 。
 * 感谢 @since114514 参与我的一个小实验：成功从worker.js发现了一段注释，详情请见 https://github.com/1234567Yang/cf-proxy-ex/issues/31 。
 * 感谢 @fangyuan99 通知我本项目其实还可以在Deno上部署，详情请见 https://github.com/1234567Yang/cf-proxy-ex/issues/33 。
-* 感谢 @04041b 发现了几个BUG，并告诉我在线代理这个思路。
 * ~~非常非常非常感谢学校管理员把好多正常网站屏蔽了，否则这个项目就不存在了。~~
 
 # Star History
