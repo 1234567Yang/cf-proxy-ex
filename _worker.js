@@ -10,7 +10,7 @@ const str = "/";
 const lastVisitProxyCookie = "__PROXY_VISITEDSITE__";
 const passwordCookieName = "__PROXY_PWD__";
 const proxyHintCookieName = "__PROXY_HINT__";
-const password = "";
+const password = "qwerty1";
 const showPasswordPage = true;
 const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
@@ -21,18 +21,17 @@ const proxyHintInjection = `
 
 setTimeout(() => {
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    var hint = \`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}. Please note that you are using a proxy, and do not log in to any website. Click to close this hint. 警告：您当前正在使用网络代理，原始链接为\${window.location.pathname}。请注意您正在使用代理，请勿登录任何网站。单击关闭此提示。\`;
-    console.log(1);
+    var hint = \`Warning: You are currently using a web proxy, the original link is \${window.location.pathname.substring(1)} . Please note that you are using a proxy, and do not log in to any website. Click to close this hint. <br>警告：您当前正在使用网络代理，原始链接为 \${window.location.pathname.substring(1)} 。请注意您正在使用代理，请勿登录任何网站。单击关闭此提示。\`;
     document.body.insertAdjacentHTML(
       'afterbegin', 
-      \`<div style="position:fixed;left:0px;top:0px;width:100%;margin:0px;padding:0px;z-index:9999999999999999999;user-select:none;cursor:pointer;" id="__PROXY_HINT_DIV__" onclick="document.getElementById('__PROXY_HINT_DIV__').remove();">
-        <span style="position:absolute;width:100%;min-height:30px;font-size:20px;color:yellow;background:red;text-align:center;border-radius:5px;">
+      \`<div style="position:fixed;left:0px;top:0px;width:100%;margin:0px;padding:0px;display:block;z-index:99999999999999999999999;user-select:none;cursor:pointer;" id="__PROXY_HINT_DIV__" onclick="document.getElementById('__PROXY_HINT_DIV__').remove();">
+        <span style="position:absolute;width:calc(100% - 20px);min-height:30px;font-size:18px;color:yellow;background:rgb(180,0,0);text-align:center;border-radius:5px;padding-left:10px;padding-right:10px;padding-top:1px;padding-bottom:1px;">
           \${hint}
         </span>
-      </div>\`    
+      </div>\`
     );
   }else{
-    alert(\`Warning: You are currently using a web proxy, the original link is \${window.location.pathname}. Please note that you are using a proxy, and do not log in to any website.\`);
+    alert(hint);
   }
 }, 3000);
 
