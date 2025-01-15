@@ -34,6 +34,7 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 # 用法
 * 请先根据 [快速开始](#快速开始) 进行部署
 * 在任意网址前面加上 `https://你的域名/` <br>例如 `https://你的域名/https://github.com`
+* [使用技巧](https://github.com/1234567Yang/cf-proxy-ex/blob/main/usage_tips.md)
 
 
 # 快速开始
