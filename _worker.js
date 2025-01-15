@@ -10,7 +10,7 @@ const str = "/";
 const lastVisitProxyCookie = "__PROXY_VISITEDSITE__";
 const passwordCookieName = "__PROXY_PWD__";
 const proxyHintCookieName = "__PROXY_HINT__";
-const password = "qwerty1";
+const password = "";
 const showPasswordPage = true;
 const replaceUrlObj = "__location____"
 var thisProxyServerUrlHttps;
@@ -827,8 +827,11 @@ Allow: /$
   var modifiedResponse;
   var bd;
   var hasProxyHintCook = (getCook(proxyHintCookieName, siteCookie) != "");
-
   const contentType = response.headers.get("Content-Type");
+
+
+
+  if (response.body) {
   if (contentType && contentType.startsWith("text/")) {
     bd = await response.text();
 
@@ -842,7 +845,7 @@ Allow: /$
       }
     });
 
-    console.log(bd); // 输出替换后的文本
+    // console.log(bd); // 输出替换后的文本
 
     if (contentType && (contentType.includes("text/html") || contentType.includes("text/javascript"))){
       bd = bd.replace("window.location", "window." + replaceUrlObj);
@@ -873,15 +876,20 @@ Allow: /$
     // }
     //console.log(bd);
 
+    // try{
     modifiedResponse = new Response(bd, response);
+    // }catch{
+    //     console.log(response.status);
+    // }
   } else {
     //var blob = await response.blob();
     //modifiedResponse = new Response(blob, response);
     //会导致大文件无法代理memory out
     modifiedResponse = new Response(response.body, response);
   }
-
-
+  }else{
+      modifiedResponse = new Response(response);
+  }
 
 
   let headers = modifiedResponse.headers;
@@ -941,7 +949,7 @@ Allow: /$
     //origin: "https://www.baidu.com"
     headers.append("Set-Cookie", cookieValue);
     
-    if(!hasProxyHintCook){
+    if(response.body && !hasProxyHintCook){ //response.body 确保是正常网页再设置cookie
       //添加代理提示
       const expiryDate = new Date();
       expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24小时
