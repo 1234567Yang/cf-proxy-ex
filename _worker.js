@@ -887,7 +887,7 @@ Allow: /$
     modifiedResponse = new Response(response.body, response);
   }
   }else{
-      modifiedResponse = new Response(response);
+    modifiedResponse = new Response(response.body, response);
   }
 
 
