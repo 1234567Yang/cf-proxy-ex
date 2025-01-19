@@ -20,3 +20,7 @@
 ![编辑代码](img/4update.png)
 * 把worker.js文件中的内容复制进去，点"保存并部署"
 ![保存并部署](img/5save.png)
+
+
+> [!TIP]
+> 如果你选择不开启安全密码，那么你可以转到Website -> Security -> Bots ->开启所有防护（Bot Fight Mode + Block AI bots）
