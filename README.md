@@ -46,6 +46,8 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 * [在Deno上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md)
 * [在Cloudflare上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_cf_tutorial.md)
 
+> [!TIP]
+> 我强烈建议开启[安全密码](#安全密码)，不仅可以防止被扫描，还可以防止网站爬虫爬取内容。
 
 自定义域名获取（可选）：
 
