@@ -36,7 +36,7 @@ setTimeout(() => {
 }, 3000);
 
 `;
-const httpRequestInjection = `
+var httpRequestInjection = `
 
 //---***========================================***---information---***========================================***---
 var now = new URL(window.location.href);
@@ -571,6 +571,10 @@ console.log("WINDOW CORS ERROR EVENT ADDED");
 
 
 `;
+httpRequestInjection = 
+`(function () {`
+  + httpRequestInjection +
+  `})();`;
 const mainPage = `
 <!DOCTYPE html>
 <html>
