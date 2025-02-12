@@ -20,8 +20,9 @@ const proxyHintInjection = `
 //---***========================================***---提示使用代理---***========================================***---
 
 setTimeout(() => {
+  var hint = \`Warning: You are currently using a web proxy, the original link is \${window.location.pathname.substring(1)} . Please note that you are using a proxy, and do not log in to any website. Click to close this hint. <br>警告：您当前正在使用网络代理，原始链接为 \${window.location.pathname.substring(1)} 。请注意您正在使用代理，请勿登录任何网站。单击关闭此提示。\`;
+
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    var hint = \`Warning: You are currently using a web proxy, the original link is \${window.location.pathname.substring(1)} . Please note that you are using a proxy, and do not log in to any website. Click to close this hint. <br>警告：您当前正在使用网络代理，原始链接为 \${window.location.pathname.substring(1)} 。请注意您正在使用代理，请勿登录任何网站。单击关闭此提示。\`;
     document.body.insertAdjacentHTML(
       'afterbegin', 
       \`<div style="position:fixed;left:0px;top:0px;width:100%;margin:0px;padding:0px;display:block;z-index:99999999999999999999999;user-select:none;cursor:pointer;" id="__PROXY_HINT_DIV__" onclick="document.getElementById('__PROXY_HINT_DIV__').remove();">
