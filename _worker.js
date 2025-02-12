@@ -20,7 +20,7 @@ const proxyHintInjection = `
 //---***========================================***---提示使用代理---***========================================***---
 
 setTimeout(() => {
-  var hint = \`Warning: You are currently using a web proxy, the original link is \${window.location.pathname.substring(1)} . Please note that you are using a proxy, and do not log in to any website. Click to close this hint. <br>警告：您当前正在使用网络代理，原始链接为 \${window.location.pathname.substring(1)} 。请注意您正在使用代理，请勿登录任何网站。单击关闭此提示。\`;
+  var hint = \`Warning: You are currently using a web proxy, so do not log in to any website. Click to close this hint. For further details, please visit <a href="https://github.com/1234567Yang/cf-proxy-ex/" style="color:rgb(250,250,180);">https://github.com/1234567Yang/cf-proxy-ex/</a>. <br>警告：您当前正在使用网络代理，请勿登录任何网站。单击关闭此提示。详情请见 <a href="https://github.com/1234567Yang/cf-proxy-ex/" style="color:rgb(250,250,180);">https://github.com/1234567Yang/cf-proxy-ex/</a>。\`;
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     document.body.insertAdjacentHTML(
