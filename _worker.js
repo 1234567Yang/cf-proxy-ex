@@ -392,6 +392,17 @@ function historyInject(){
     //console.log("History url standard: " + url);
     //console.log("History url changed: " + changeURL(url));
 
+    
+    //给ipinfo.io的补丁：历史会设置一个https:/ipinfo.io，可能是他们获取了href，然后想设置根目录
+    if(url.startsWith("/" + oriUrl.href.replace("://", ":/"))) url = url.substring(("/" + oriUrl.href.replace("://", ":/")).length); // https://example.com/
+    if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1).replace("://", ":/"))) url = url.substring(("/" + oriUrl.href)replace("://", ":/").length - 1); // https://example.com (没有/在最后)
+
+
+    //给ipinfo.io的补丁：历史会设置一个https:/ipinfo.io，可能是他们获取了href，然后想设置根目录
+    if(url.startsWith("/" + oriUrl.href.replace("://", ":/"))) url = url.substring(("/" + oriUrl.href.replace("://", ":/")).length); // https://example.com/
+    if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1).replace("://", ":/"))) url = url.substring(("/" + oriUrl.href)replace("://", ":/").length - 1); // https://example.com (没有/在最后)
+
+
     var u = changeURL(url);
     return originalReplaceState.apply(this, [state, title, u]);
   };
