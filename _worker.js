@@ -392,12 +392,6 @@ function historyInject(){
     //console.log("History url standard: " + url);
     //console.log("History url changed: " + changeURL(url));
 
-    
-    //给ipinfo.io的补丁：历史会设置一个https:/ipinfo.io，可能是他们获取了href，然后想设置根目录
-    if(url.startsWith("/" + oriUrl.href.replace("://", ":/"))) url = url.substring(("/" + oriUrl.href.replace("://", ":/")).length); // https://example.com/
-    if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1).replace("://", ":/"))) url = url.substring(("/" + oriUrl.href)replace("://", ":/").length - 1); // https://example.com (没有/在最后)
-
-
     //给ipinfo.io的补丁：历史会设置一个https:/ipinfo.io，可能是他们获取了href，然后想设置根目录
     if(url.startsWith("/" + oriUrl.href.replace("://", ":/"))) url = url.substring(("/" + oriUrl.href.replace("://", ":/")).length); // https://example.com/
     if(url.startsWith("/" + oriUrl.href.substring(0, oriUrl.href.length - 1).replace("://", ":/"))) url = url.substring(("/" + oriUrl.href)replace("://", ":/").length - 1); // https://example.com (没有/在最后)
@@ -863,9 +857,9 @@ Allow: /$
 
       // console.log(bd); // 输出替换后的文本
 
-      if (contentType && (contentType.includes("text/html") || contentType.includes("text/javascript"))) {
-        bd = bd.replace("window.location", "window." + replaceUrlObj);
-        bd = bd.replace("document.location", "document." + replaceUrlObj);
+      if (contentType && (contentType.includes("html") || contentType.includes("javascript"))) {
+        bd = bd.replaceAll("window.location", "window." + replaceUrlObj);
+        bd = bd.replaceAll("document.location", "document." + replaceUrlObj);
       }
       //bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
       //也需要加上这个方法因为有时候server返回json也是html
