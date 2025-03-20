@@ -34,7 +34,7 @@ setTimeout(() => {
   }else{
     alert(hint);
   }
-}, 3000);
+}, 5000);
 
 `;
 var httpRequestInjection = `
