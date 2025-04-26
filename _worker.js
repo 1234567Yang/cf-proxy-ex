@@ -645,29 +645,20 @@ const mainPage = `
       <ul>
         <li>If your browser show 400 bad request, please clear your browser cookie<br></li>
         <li>Why I make this:<br> Because school blcok every website that I can find math / CS and other subjects' study material and question solutions. In the eyes of the school, China (and some other countries) seems to be outside the scope of this "world". They block access to server IP addresses in China and block access to Chinese search engines and video websites. Of course, some commonly used social software has also been blocked, which once made it impossible for me to send messages to my parents on campus. I don't think that's how it should be, so I'm going to fight it as hard as I can. I believe this will not only benefit myself, but a lot more people can get benefits.</li>
-       <li>If this website is blocked by your school: <br>Contact me at <a href="mailto:help@lhyang.org">help@lhyang.org</a>, and I will setup a new webpage.</li>
+        <li>If this website is blocked by your school: Setup a new one by your self.</li>
         <li>Limitation:<br>Although I tried my best to make every website proxiable, there still might be pages or resources that can not be load, and the most important part is that <span class="important">YOU SHOULD NEVER LOGIN ANY ACCOUNT VIA ONLINE PROXY</span>.</li>
       </ul>
 
     <h3>
         <br>
-        <span>Proxies that can bypass the school network blockade:</span>
+        <span>Bypass the network blockade:</span>
         <br><br>
-        <span>Traditional VPNs such as <a href="https://hide.me/">hide me</a>.</span>
+        <span>Traditional VPNs.</span>
         <br><br>
-        <a href="https://www.torproject.org/">Tor Browser</a><span>, short for The Onion Router, is free and open-source software for enabling anonymous communication. It directs Internet traffic via a free, worldwide volunteer overlay network that consists of more than seven thousand relays. Using Tor makes it more difficult to trace a user's Internet activity.</span>
-        <br><br>
-        <a href="https://v2rayn.org/">v2RayN</a><span> is a GUI client for Windows, support Xray core and v2fly core and others. You must subscribe to an <a href = "https://aijichang.org/6190/">airport</a> to use it. For example, you can subscribe <a href="https://feiniaoyun.xyz/">fly bird cloud</a>.</span>
-        <br><br>
-        <span>Bypass <del>Goguardian</del> by proxy: You can buy a domain($1) and setup by yourself: </span><a href="https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md">how to setup a proxy</a><span>. Unless <del>Goguardian</del> use white list mode, this can always work.</span>
-        <br>
-        <span>Too expensive? Never mind! There are a lot of free domains registration companies (for the first year of the domain) that do not need any credit card, search online!</span>
+        <span>Bypass by proxy: You can buy a domain($1) and setup by yourself: </span><a href="https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md">how to setup a proxy</a><span>. Unless they use white list mode, this can always work.</span>
         <br><br>
         <span>Youtube video unblock: "Thanks" for Russia that they started to invade Ukraine and Google blocked the traffic from Russia, there are a LOT of mirror sites working. You can even <a href="https://github.com/iv-org/invidious">setup</a> one by yourself.</span>
     </h3>
-    <a href="https://goguardian.com" style="visibility:hidden"></a>
-    <a href="https://blocked.goguardian.com/" style="visibility:hidden"></a>
-    <a href="https://www.google.com/gen_204" style="visibility:hidden"></a>
     <p style="font-size:280px !important;width:100%;" class="center">
         ☭
     </p>
