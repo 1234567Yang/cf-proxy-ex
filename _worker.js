@@ -748,12 +748,12 @@ async function handleRequest(request) {
     return Response.redirect("https://www.baidu.com/favicon.ico", 301);
   }
   if (request.url.endsWith("robots.txt")) {
-    return getHTMLResponse(`
-User-Agent: *
-Disallow: /*
-Allow: /$
-`);
+    return new Response(`User-Agent: *
+  Disallow: /`, {
+      headers: { "Content-Type": "text/plain" },
+    });
   }
+  
   //var siteOnly = url.pathname.substring(url.pathname.indexOf(str) + str.length);
 
   var actualUrlStr = url.pathname.substring(url.pathname.indexOf(str) + str.length) + url.search + url.hash;
