@@ -736,7 +736,7 @@ async function handleRequest(request) {
 
   const url = new URL(request.url);
   if (request.url.endsWith("favicon.ico")) {
-    return Response.redirect("https://www.baidu.com/favicon.ico", 301);
+    return getRedirect("https://www.baidu.com/favicon.ico");
   }
   if (request.url.endsWith("robots.txt")) {
     return new Response(`User-Agent: *
@@ -771,7 +771,7 @@ async function handleRequest(request) {
       if (lastVisit != null && lastVisit != "") {
         //(!lastVisit.startsWith("http"))?"https://":"" + 
         //现在的actualUrlStr如果本来不带https:// 的话那么现在也不带，因为判断是否带protocol在后面
-        return Response.redirect(thisProxyServerUrlHttps + lastVisit + "/" + actualUrlStr, 301);
+        return getRedirect(thisProxyServerUrlHttps + lastVisit + "/" + actualUrlStr);
       }
     }
     return getHTMLResponse("Something is wrong while trying to get your cookie: <br> siteCookie: " + siteCookie + "<br>" + "lastSite: " + lastVisit);
@@ -780,7 +780,7 @@ async function handleRequest(request) {
 
   if (!actualUrlStr.startsWith("http") && !actualUrlStr.includes("://")) { //从www.xxx.com转到https://www.xxx.com
     //actualUrlStr = "https://" + actualUrlStr;
-    return Response.redirect(thisProxyServerUrlHttps + "https://" + actualUrlStr, 301);
+    return getRedirect(thisProxyServerUrlHttps + "https://" + actualUrlStr);
   }
 
   //if(!actualUrlStr.endsWith("/")) actualUrlStr += "/";
@@ -812,7 +812,7 @@ async function handleRequest(request) {
 
     if (checkHostCase.toLowerCase() != checkHostCase) {
       //actualUrl.href 会自动转换host为小写
-      return Response.redirect(thisProxyServerUrlHttps + actualUrl.href, 301);
+      return getRedirect(thisProxyServerUrlHttps + actualUrl.href);
     }
   }
 
@@ -851,7 +851,7 @@ async function handleRequest(request) {
   if (response.status.toString().startsWith("3") && response.headers.get("Location") != null) {
     //console.log(base_url + response.headers.get("Location"))
     try {
-      return Response.redirect(thisProxyServerUrlHttps + new URL(response.headers.get("Location"), actualUrlStr).href, 301);
+      return getRedirect(thisProxyServerUrlHttps + new URL(response.headers.get("Location"), actualUrlStr).href);
     } catch {
       getHTMLResponse(redirectError + "<br>the redirect url:" + response.headers.get("Location") + ";the url you are now at:" + actualUrlStr);
     }
@@ -1129,6 +1129,11 @@ function getHTMLResponse(html) {
     }
   });
 }
+
+function getRedirect(url){
+  return Response.redirect(url, 301);
+}
+
 // https://stackoverflow.com/questions/14480345/how-to-get-the-nth-occurrence-in-a-string
 function nthIndex(str, pat, n) {
   var L = str.length, i = -1;
