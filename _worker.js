@@ -890,12 +890,35 @@ async function handleRequest(request) {
         //console.log("STR" + actualUrlStr)
         bd = covToAbs(bd, actualUrlStr);
         bd = removeIntegrityAttributes(bd);
-        bd =
-          "<script>" +
-          ((!hasProxyHintCook) ? proxyHintInjection : "") +
-          httpRequestInjection +
-          "</script>" +
-          bd;
+
+
+        //https://en.wikipedia.org/wiki/Byte_order_mark
+        var hasBom = false;
+        if (bd.charCodeAt(0) === 0xFEFF) {
+          bd = bd.substring(1); // 移除 BOM
+          hasBom = true;
+        }
+
+
+        // 根本不是这个的问题，F**K you chatgpt
+        // var xmlTemp = "";
+        // if(bd.startsWith("<?xml")){
+        //   xmlTemp = bd.substring(0, bd.indexOf(">") + 1); //先临时保存一下
+        //   var bd = bd.substring(bd.indexOf(">") + 1);
+        // }
+        //else{
+        //   console.log(bd.substring(0,10) + "   " + bd.startsWith("<?xml"));
+        // }
+
+
+        var inject = "<script>" +
+        ((!hasProxyHintCook) ? proxyHintInjection : "") +
+        httpRequestInjection +
+        "</script>";
+
+        bd = (hasBom?"\uFEFF":"") + //第一个是零宽度不间断空格，第二个是空
+        inject + 
+        bd;
       }
 
       //else{
