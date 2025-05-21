@@ -34,6 +34,9 @@ https://y.demo.lhyang.org/https://duckduckgo.com/?t=h_&q=hi&ia=chat
 ### Google地图
 https://y.demo.lhyang.org/https://www.google.com/maps
 
+Alternative website:
+https://shengtai.edu.pastapexamsdownload.space/
+Password is `maga2028`
 
 # 用法
 * 请先根据 [快速开始](#快速开始) 进行部署
