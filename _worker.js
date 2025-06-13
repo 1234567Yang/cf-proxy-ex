@@ -12,7 +12,9 @@ const passwordCookieName = "__PROXY_PWD__";
 const proxyHintCookieName = "__PROXY_HINT__";
 const password = "";
 const showPasswordPage = true;
-const replaceUrlObj = "__location____"
+const replaceUrlObj = "__location__yproxy__"
+const injectedJsId = "__yproxy_injected_js_id__"
+
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
 // const CSSReplace = ["https://", "http://"];
@@ -523,7 +525,7 @@ function covScript(){ //由于observer经过测试不会hook添加的script标�
 networkInject();
 windowOpenInject();
 elementPropertyInject();
-//appendChildInject(); 经过测试如果放上去将导致maps.google.com无法使用
+//appendChildInject();  // 经过测试如果放上去将导致maps.google.com无法使用
 documentLocationInject();
 windowLocationInject();
 historyInject();
@@ -575,12 +577,29 @@ console.log("WINDOW CORS ERROR EVENT ADDED");
 
 
 
-
 `;
-httpRequestInjection =
-  `(function () {`
-  + httpRequestInjection +
-  `})();`;
+httpRequestInjection = `
+(function () {
+  ${httpRequestInjection}
+  setTimeout(()=>{document.getElementById("${injectedJsId}").remove();}, 1);
+})();
+`;
+
+//   document.getElementById(${injectedJsId}).remove();
+/*
+经过测试是可以的，JS还是会正常执行
+
+const script = document.createElement("script");
+script.id="t1script";
+script.textContent = `var t1 = "123"; function gett1(){return t1;}; document.body.addEventListener('click', function () {
+  console.log(1);
+});
+`;
+document.body.appendChild(script);
+document.getElementById("t1script").remove();
+*/
+
+
 const mainPage = `
 <!DOCTYPE html>
 <html>
@@ -884,6 +903,7 @@ async function handleRequest(request) {
         bd = bd.replaceAll("window.location", "window." + replaceUrlObj);
         bd = bd.replaceAll("document.location", "document." + replaceUrlObj);
       }
+
       //bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
       //也需要加上这个方法因为有时候server返回json也是html
       if (contentType && contentType.includes("text/html") && bd.includes("<html")) {
@@ -911,10 +931,19 @@ async function handleRequest(request) {
         // }
 
 
-        var inject = "<script>" +
-        ((!hasProxyHintCook) ? proxyHintInjection : "") +
-        httpRequestInjection +
-        "</script>";
+        var inject = 
+        `
+        <!DOCTYPE html>
+        <script id="${injectedJsId}">
+        ${((!hasProxyHintCook) ? proxyHintInjection : "")}
+        ${httpRequestInjection}
+        </script>
+        `;
+
+        // <script id="inj">document.getElementById("inj").remove();</script>
+
+
+
 
         bd = (hasBom?"\uFEFF":"") + //第一个是零宽度不间断空格，第二个是空
         inject + 
