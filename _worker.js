@@ -41,6 +41,8 @@ setTimeout(() => {
 
 `;
 var httpRequestInjection = `
+
+
 //---***========================================***---information---***========================================***---
 var nowURL = new URL(window.location.href);
 var proxy_host = nowURL.host; //代理的host - proxy.com
@@ -92,6 +94,14 @@ function changeURL(relativePath){
     console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
     return "";
   }
+}
+
+
+// change from https://proxy.com/https://target_website.com/a to https://target_website.com/a
+function getOriginalUrl(url){
+  if(url == null) return null;
+  if(url.startsWith(proxy_host_with_schema)) return url.substring(proxy_host_with_schema.length);
+  return url;
 }
 
 
@@ -181,12 +191,45 @@ function elementPropertyInject(){
   HTMLElement.prototype.setAttribute = function (name, value) {
       if (name == "src" || name == "href") {
         value = changeURL(value);
-        //console.log("~~~~~~" + value);
       }
       originalSetAttribute.call(this, name, value);
   };
 
-  console.log("ELEMENT PROPERTY INJECTED");
+
+  const originalGetAttribute = HTMLElement.prototype.getAttribute;
+  HTMLElement.prototype.getAttribute = function (name) {
+    const val = originalGetAttribute.call(this, name);
+    if (name == "href" || name == "src") {
+      return getOriginalUrl(val);
+    }
+    return val;
+  };
+
+
+
+  console.log("ELEMENT PROPERTY (get/set attribute) INJECTED");
+
+
+
+  // -------------------------------------
+
+
+  //ChatGPT + personal modify
+  const descriptor = Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype, 'href');
+  Object.defineProperty(HTMLAnchorElement.prototype, 'href', {
+    get: function () {
+      const real = descriptor.get.call(this);
+      return getOriginalUrl(real);
+    },
+    set: function (val) {
+      descriptor.set.call(this, changeURL(val));
+    },
+    configurable: true
+  });
+
+
+
+  console.log("ELEMENT PROPERTY (src / href) INJECTED");
 }
 
 
@@ -570,6 +613,7 @@ window.addEventListener('error', event => {
   }
 }, true);
 console.log("WINDOW CORS ERROR EVENT ADDED");
+
 
 
 
