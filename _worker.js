@@ -811,28 +811,30 @@ async function handleRequest(request) {
 
   //check for upper case: proxy.com/https://ABCabc.dev
   {
-    var checkHostCase = actualUrlStr.substring(actualUrlStr.indexOf("://") + 3);
+    // var checkHostCase = actualUrlStr.substring(actualUrlStr.indexOf("://") + 3);
 
-    var pos1 = checkHostCase.indexOf("\\");
-    var pos2 = checkHostCase.indexOf("/");
-    var finalPos;
-    if (pos1 === -1 && pos2 === -1) {
-      finalPos = -1; // 都没有找到
-    } else if (pos1 === -1) {
-      finalPos = pos2;
-    } else if (pos2 === -1) {
-      finalPos = pos1;
-    } else {
-      finalPos = Math.min(pos1, pos2);
-    }
+    // var pos1 = checkHostCase.indexOf("\\");
+    // var pos2 = checkHostCase.indexOf("/");
+    // var finalPos;
+    // if (pos1 === -1 && pos2 === -1) {
+    //   finalPos = -1; // 都没有找到
+    // } else if (pos1 === -1) {
+    //   finalPos = pos2;
+    // } else if (pos2 === -1) {
+    //   finalPos = pos1;
+    // } else {
+    //   finalPos = Math.min(pos1, pos2);
+    // }
 
 
-    checkHostCase = checkHostCase.substring(0, (finalPos != -1) ? finalPos : checkHostCase.length);
+    // checkHostCase = checkHostCase.substring(0, (finalPos != -1) ? finalPos : checkHostCase.length);
 
-    if (checkHostCase.toLowerCase() != checkHostCase) {
-      //actualUrl.href 会自动转换host为小写
-      return getRedirect(thisProxyServerUrlHttps + actualUrl.href);
-    }
+    // if (checkHostCase.toLowerCase() != checkHostCase) {
+    //   //actualUrl.href 会自动转换host为小写
+    //   return getRedirect(thisProxyServerUrlHttps + actualUrl.href);
+    // }
+
+    if(actualUrlStr != actualUrl.href) return getRedirect(thisProxyServerUrlHttps + actualUrl.href);
   }
 
 
