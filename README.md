@@ -54,11 +54,6 @@ Password is `maga2028`
 
 自定义域名获取（可选）：
 
-> [!NOTE]  
-> 请注意，免费域名我未经实际测试，只是转发消息，并且实际上应该很难获取
-
-* 免费域名申请：https://secure.nom.za/  https://nic.eu.org/   https://nic.ua
-* 不需要申请，link域名0元免费1年：https://dynadot.com/
 * 域名购买：https://porkbun.com/  https://domain.com/<br >购买时可以按 `Ctrl + F`，搜索 `$0.` 
 
 
