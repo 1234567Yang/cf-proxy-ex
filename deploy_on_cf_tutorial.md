@@ -22,11 +22,19 @@
 
 ---
 
+### 如果你选择粘贴 worker 代码，而不需要 connect to git 实现自动更新，那么恭喜你，只需要点击 `Start with Hello World!`，然后再点击 代码图标 `</>` ，把 `worker.js` 里面的内容粘贴进去就行了，无需后续步骤。
+
+否则请继续按以下步骤操作。
+
 ![2](img/depoly/cf/2.png)
 
 ---
 
 ![3](img/depoly/cf/3.png)
+
+---
+
+### 到了这一步，你要先 [Fork （分叉）](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) 一份自己的储存库，因为 Coudflare 的 Worker 部署如果用 git repo 的话，（如果配置里面的 worker 程序名和 Cloudflare 里面写的不一样）它会给储存库添加一个分支。
 
 ---
 
