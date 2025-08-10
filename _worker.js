@@ -1040,7 +1040,6 @@ async function handleRequest(request) {
           `
         <!DOCTYPE html>
         <script id="${injectedJsId}">
-        ${((!hasProxyHintCook) ? proxyHintInjection : "")}
         ${httpRequestInjection}
         </script>
         `;
