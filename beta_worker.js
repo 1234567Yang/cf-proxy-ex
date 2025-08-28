@@ -23,29 +23,40 @@ const passwordCookieName = "__PROXY_PWD__";
 const proxyHintCookieName = "__PROXY_HINT__";
 const password = "";
 const showPasswordPage = true;
-const replaceUrlObj = "__location__yproxy__"
+const replaceUrlObj = "__location__yproxy__";
 
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
 // const CSSReplace = ["https://", "http://"];
 const proxyHintInjection = `
 
+function toEntities(str) {
+  return str.split("").map(ch => \`&#\${ch.charCodeAt(0)};\`).join("");
+}
+
+
 //---***========================================***---提示使用代理---***========================================***---
 
 setTimeout(() => {
-  var hint = \`Warning: You are currently using a web proxy, so do not log in to any website. Click to close this hint. For further details, please visit the link below. <br>警告：您当前正在使用网络代理，请勿登录任何网站。单击关闭此提示。详情请见此链接： <a href="https://github.com/1234567Yang/cf-proxy-ex/" style="color:rgb(250,250,180);">https://github.com/1234567Yang/cf-proxy-ex/</a>。\`;
+  var hint = \`
+Warning: You are currently using a web proxy, so do not log in to any website. Click to close this hint. For further details, please visit the link below.
+警告：您当前正在使用网络代理，请勿登录任何网站。单击关闭此提示。详情请见以下链接。
+\`;
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     document.body.insertAdjacentHTML(
       'afterbegin', 
       \`<div style="position:fixed;left:0px;top:0px;width:100%;margin:0px;padding:0px;display:block;z-index:99999999999999999999999;user-select:none;cursor:pointer;" id="__PROXY_HINT_DIV__" onclick="document.getElementById('__PROXY_HINT_DIV__').remove();">
-        <span style="position:absolute;width:calc(100% - 20px);min-height:30px;font-size:18px;color:yellow;background:rgb(180,0,0);text-align:center;border-radius:5px;padding-left:10px;padding-right:10px;padding-top:1px;padding-bottom:1px;">
-          \${hint}
+        <span style="position:relative;display:block;width:calc(100% - 20px);min-height:30px;font-size:14px;color:yellow;background:rgb(180,0,0);text-align:center;border-radius:5px;padding-left:10px;padding-right:10px;padding-top:1px;padding-bottom:1px;">
+          \${toEntities(hint)}
+          <br>
+          <a href="https://github.com/1234567Yang/cf-proxy-ex/" style="color:rgb(250,250,180);">https://github.com/1234567Yang/cf-proxy-ex/</a>
         </span>
-      </div>\`
+      </div>
+      \`
     );
   }else{
-    alert(hint);
+    alert(hint + "https://github.com/1234567Yang/cf-proxy-ex");
   }
 }, 5000);
 
@@ -640,14 +651,26 @@ function ${htmlCovPathInjectFuncName}(htmlString) {
   
   // Process all elements in the temporary document
   const allElements = tempDoc.querySelectorAll('*');
+
   allElements.forEach(element => {
     covToAbs(element);
     removeIntegrityAttributesFromElement(element);
-  });
+
+
+
+    if (element.tagName === 'SCRIPT') {
+      if (element.textContent && !element.src) {
+          element.textContent = replaceContentPaths(element.textContent);
+      }
+    }
   
-  // Also process the documentElement itself
-  // covToAbs(tempDoc.documentElement);
-  // removeIntegrityAttributesFromElement(tempDoc.documentElement);
+    if (element.tagName === 'STYLE') {
+      if (element.textContent) {
+          element.textContent = replaceContentPaths(element.textContent);
+      }
+    }
+  });
+
   
   // Get the modified HTML string
   const modifiedHtml = tempDoc.documentElement.outerHTML;
@@ -658,6 +681,31 @@ function ${htmlCovPathInjectFuncName}(htmlString) {
   document.write('<!DOCTYPE html>' + modifiedHtml);
   document.close();
 }
+
+
+
+
+function replaceContentPaths(content){
+  // ChatGPT 替换里面的链接
+  let regex = new RegExp(\`(?<!src="|href=")(https?:\\\\/\\\\/[^\s'"]+)\`, 'g');
+  // 这里写四个 \ 是因为 Server side 的文本也会把它当成转义符
+
+
+  content = content.replace(regex, (match) => {
+    if (match.startsWith("http")) {
+      return proxy_host_with_schema + match;
+    } else {
+      return proxy_host + "/" + match;
+    }
+  });
+
+
+
+  return content;
+
+
+}
+
 `;
 
 
@@ -1045,10 +1093,22 @@ async function handleRequest(request) {
           `
         <!DOCTYPE html>
         <script>
-        (function () {
+        
 
-          
+
+
+        // the proxy hint must be written as a single IIFE, or it will show error in example.com   idk what's wrong
+        (function () {
+          // proxy hint
           ${((!hasProxyHintCook) ? proxyHintInjection : "")}
+        })();
+
+
+
+
+        (function () {
+          // hooks stuff - Must before convert path functions
+          // it defines all necessary variables
           ${httpRequestInjection}
 
 
@@ -1066,6 +1126,24 @@ async function handleRequest(request) {
 
 
           const bytes = new Uint8Array(originalBodyBase64Encoded.split(',').map(Number));
+
+
+
+          // help me debug
+          console.log(
+            '%c' + 'Debug code start',
+            'color: blue; font-size: 15px;'
+          );
+          console.log(
+            '%c' + new TextDecoder().decode(bytes),
+            'color: green; font-size: 10px; padding:5px;'
+          );
+          console.log(
+            '%c' + 'Debug code end',
+            'color: blue; font-size: 15px;'
+          );
+
+
           ${htmlCovPathInjectFuncName}(new TextDecoder().decode(bytes));
         
         
@@ -1092,7 +1170,7 @@ async function handleRequest(request) {
         //ChatGPT 替换里面的链接
         let regex = new RegExp(`(?<!src="|href=")(https?:\\/\\/[^\s'"]+)`, 'g');
         bd = bd.replace(regex, (match) => {
-          if (match.includes("http")) {
+          if (match.startsWith("http")) {
             return thisProxyServerUrlHttps + match;
           } else {
             return thisProxyServerUrl_hostOnly + "/" + match;
@@ -1100,7 +1178,12 @@ async function handleRequest(request) {
         });
       }
 
-      // 问题:在设置css background image 的时候可以使用相对目录  
+      // ***************************************************
+      // ***************************************************
+      // ***************************************************
+      // 问题:在设置css background image 的时候可以使用相对目录 
+      // ***************************************************
+ 
 
       modifiedResponse = new Response(bd, response);
     }
