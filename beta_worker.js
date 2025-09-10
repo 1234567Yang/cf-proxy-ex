@@ -9,6 +9,17 @@ Beta version is for test and debug, it is unstable and you should not use it if 
 */
 
 
+/*
+
+*** WARNING ***:
+Beta version is for test and debug, it is unstable and you should not use it if you want to set up a proxy
+
+*** 警告 ***：
+此版本为测试版本，可能有漏洞并且不稳定，如需设代理请使用正式版
+
+*/
+
+
 addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   thisProxyServerUrlHttps = `${url.protocol}//${url.hostname}/`;
@@ -69,11 +80,8 @@ var nowURL = new URL(window.location.href);
 var proxy_host = nowURL.host; //代理的host - proxy.com
 var proxy_protocol = nowURL.protocol; //代理的protocol
 var proxy_host_with_schema = proxy_protocol + "//" + proxy_host + "/"; //代理前缀 https://proxy.com/
-var original_website_url_str = window.location.href.substring(proxy_host_with_schema.length); //如：https://example.com/1?q#1
+var original_website_url_str = window.location.href.substring(proxy_host_with_schema.length); //被代理的【完整】地址 如：https://example.com/1?q#1
 var original_website_url = new URL(original_website_url_str);
-
-var original_website_href = nowURL.pathname.substring(1); // 被代理的地址 https://proxied_website.com/path?q=1#1
-if(!original_website_href.startsWith("http")) original_website_href = "https://" + original_website_href;
 
 var original_website_host = original_website_url_str.substring(original_website_url_str.indexOf("://") + "://".length);
 original_website_host = original_website_host.split('/')[0]; //被代理的Host proxied_website.com
@@ -101,9 +109,9 @@ function changeURL(relativePath){
   }
   try {
     var absolutePath = new URL(relativePath, original_website_url_str).href; //获取绝对路径
-    absolutePath = absolutePath.replace(window.location.href, original_website_href); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
-    absolutePath = absolutePath.replace(encodeURI(window.location.href), encodeURI(original_website_href));
-    absolutePath = absolutePath.replace(encodeURIComponent(window.location.href), encodeURIComponent(original_website_href));
+    absolutePath = absolutePath.replace(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
+    absolutePath = absolutePath.replace(encodeURI(window.location.href), encodeURI(original_website_url_str));
+    absolutePath = absolutePath.replace(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
 
     absolutePath = absolutePath.replace(proxy_host, original_website_host);
     absolutePath = absolutePath.replace(encodeURI(proxy_host), encodeURI(original_website_host));
@@ -134,6 +142,8 @@ function networkInject(){
   var originalOpen = XMLHttpRequest.prototype.open;
   var originalFetch = window.fetch;
   XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+
+    console.log("Original: " + url);
 
     url = changeURL(url);
     
@@ -262,13 +272,6 @@ class ProxyLocation {
       this.originalLocation = originalLocation;
   }
 
-  getStrNPosition(string, subString, index) {
-    return string.split(subString, index).join(subString).length;
-  }
-  getOriginalHref() {
-    return window.location.href.substring(this.getStrNPosition(window.location.href,"/",3)+1);
-  }
-
   // 方法：重新加载页面
   reload(forcedReload) {
     this.originalLocation.reload(forcedReload);
@@ -286,7 +289,7 @@ class ProxyLocation {
 
   // 属性：获取和设置 href
   get href() {
-    return this.getOriginalHref();
+    return original_website_url_str;
   }
 
   set href(url) {
@@ -299,9 +302,6 @@ class ProxyLocation {
   }
 
   set protocol(value) {
-    //if(!value.endsWith(":")) value += ":";
-    //console.log(nowlink + value + this.getOriginalHref().substring(this.getOriginalHref().indexOf(":") + 1));
-    //this.originalLocation.href = nowlink + value + this.getOriginalHref().substring(this.getOriginalHref().indexOf(":") + 1);
     original_website_url.protocol = value;
     window.location.href = proxy_host_with_schema + original_website_url.href;
   }
@@ -312,10 +312,6 @@ class ProxyLocation {
   }
 
   set host(value) {
-    //this.originalLocation.href = nowlink + this.getOriginalHref().substring(0,this.getOriginalHref().indexOf("//") + 2)+value+this.getOriginalHref().substring(this.getStrNPosition(this.getOriginalHref(), "/", 3));
-    //console.log(nowlink + oriUrl.protocol + "//" + value + oriUrl.pathname);
-    //this.originalLocation.href = nowlink + oriUrl.protocol + "//" + value + oriUrl.pathname;
-
     original_website_url.host = value;
     window.location.href = proxy_host_with_schema + original_website_url.href;
   }
@@ -326,7 +322,6 @@ class ProxyLocation {
   }
 
   set hostname(value) {
-    //this.originalLocation.href = nowlink + this.getOriginalHref().substring(0,this.getOriginalHref().indexOf("//") + 2)+value+this.getOriginalHref().substring(this.getStrNPosition(this.getOriginalHref(), "/", 3));
     original_website_url.hostname = value;
     window.location.href = proxy_host_with_schema + original_website_url.href;
   }
@@ -527,7 +522,7 @@ function covToAbs(element) {
           var absolutePath = changeURL(relativePath);
           element.setAttribute(setAttr, absolutePath);
         } catch (e) {
-          console.log("Exception occured: " + e.message + original_website_href + "   " + relativePath);
+          console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
         }
     }
   }
@@ -585,7 +580,7 @@ function covScript(){ //由于observer经过测试不会hook添加的script标�
 networkInject();
 windowOpenInject();
 elementPropertyInject();
-// appendChildInject(); // 经过测试如果放上去将导致maps.google.com无法使用
+appendChildInject();
 documentLocationInject();
 windowLocationInject();
 historyInject();
