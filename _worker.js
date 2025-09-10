@@ -12,8 +12,7 @@ const passwordCookieName = "__PROXY_PWD__";
 const proxyHintCookieName = "__PROXY_HINT__";
 const password = "";
 const showPasswordPage = true;
-const replaceUrlObj = "__location__yproxy__"
-const injectedJsId = "__yproxy_injected_js_id__"
+const replaceUrlObj = "__location__yproxy__";
 
 var thisProxyServerUrlHttps;
 var thisProxyServerUrl_hostOnly;
@@ -51,7 +50,7 @@ Warning: You are currently using a web proxy, so do not log in to any website. C
 }, 5000);
 
 `;
-var httpRequestInjection = `
+const httpRequestInjection = `
 
 
 //---***========================================***---information---***========================================***---
@@ -630,26 +629,74 @@ console.log("WINDOW CORS ERROR EVENT ADDED");
 
 
 `;
-httpRequestInjection = `
-(function () {
-  ${httpRequestInjection}
-  setTimeout(()=>{document.getElementById("${injectedJsId}").remove();}, 1);
-})();
+
+
+const htmlCovPathInjectFuncName = "parseAndInsertDoc";
+const htmlCovPathInject = `
+function ${htmlCovPathInjectFuncName}(htmlString) {
+  // First, modify the HTML string to update all URLs and remove integrity
+  const parser = new DOMParser();
+  const tempDoc = parser.parseFromString(htmlString, 'text/html');
+  
+  // Process all elements in the temporary document
+  const allElements = tempDoc.querySelectorAll('*');
+
+  allElements.forEach(element => {
+    covToAbs(element);
+    removeIntegrityAttributesFromElement(element);
+
+
+
+    if (element.tagName === 'SCRIPT') {
+      if (element.textContent && !element.src) {
+          element.textContent = replaceContentPaths(element.textContent);
+      }
+    }
+  
+    if (element.tagName === 'STYLE') {
+      if (element.textContent) {
+          element.textContent = replaceContentPaths(element.textContent);
+      }
+    }
+  });
+
+  
+  // Get the modified HTML string
+  const modifiedHtml = tempDoc.documentElement.outerHTML;
+  
+  // Now use document.open/write/close to replace the entire document
+  // This preserves the natural script execution order
+  document.open();
+  document.write('<!DOCTYPE html>' + modifiedHtml);
+  document.close();
+}
+
+
+
+
+function replaceContentPaths(content){
+  // ChatGPT 替换里面的链接
+  let regex = new RegExp(\`(?<!src="|href=")(https?:\\\\/\\\\/[^\s'"]+)\`, 'g');
+  // 这里写四个 \ 是因为 Server side 的文本也会把它当成转义符
+
+
+  content = content.replace(regex, (match) => {
+    if (match.startsWith("http")) {
+      return proxy_host_with_schema + match;
+    } else {
+      return proxy_host + "/" + match;
+    }
+  });
+
+
+
+  return content;
+
+
+}
+
 `;
 
-//   document.getElementById(${injectedJsId}).remove();
-/*
-经过测试是可以的，JS还是会正常执行
-
-const script = document.createElement("script");
-script.id="t1script";
-script.textContent = `var t1 = "123"; function gett1(){return t1;}; document.body.addEventListener('click', function () {
-  console.log(1);
-});
-`;
-document.body.appendChild(script);
-document.getElementById("t1script").remove();
-*/
 
 
 const mainPage = `
@@ -976,6 +1023,8 @@ async function handleRequest(request) {
   const contentType = response.headers.get("Content-Type");
 
 
+  var isHTML = false;
+
   // =======================================================================================
   // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果有 Body 就处理 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*
   // =======================================================================================
@@ -988,25 +1037,7 @@ async function handleRequest(request) {
       bd = await response.text();
 
 
-
-      // =======================================================================================
-      // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果不是 HTML，就 Regex 替换掉链接 *-*
-      // =======================================================================================
-
-      // 暂时删除 If，等确定在客户端全部处理后再加上
-      // if not html {
-        //ChatGPT 替换里面的链接
-        let regex = new RegExp(`(?<!src="|href=")(https?:\\/\\/[^\s'"]+)`, 'g');
-        bd = bd.replace(regex, (match) => {
-          if (match.includes("http")) {
-            return thisProxyServerUrlHttps + match;
-          } else {
-            return thisProxyServerUrl_hostOnly + "/" + match;
-          }
-        });
-      // }
-
-
+      isHTML = (contentType && contentType.includes("text/html") && bd.includes("<html"));
 
 
 
@@ -1024,7 +1055,7 @@ async function handleRequest(request) {
 
 
 
-      
+
       // =======================================================================================
       // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果是 HTML *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
       // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 一定放在最后，要注入模板，注入的模板不能被替换关键词
@@ -1032,9 +1063,9 @@ async function handleRequest(request) {
       // =======================================================================================
       //bd.includes("<html")  //不加>因为html标签上可能加属性         这个方法不好用因为一些JS中竟然也会出现这个字符串
       //也需要加上这个方法因为有时候server返回json也是html
-      if (contentType && contentType.includes("text/html") && bd.includes("<html")) {
+      if (isHTML) {
         //console.log("STR" + actualUrlStr)
-        
+
         // 这里就可以删除了，全部在客户端进行替换（以后）
         // bd = covToAbs_ServerSide(bd, actualUrlStr);
         // bd = removeIntegrityAttributes(bd);
@@ -1050,10 +1081,65 @@ async function handleRequest(request) {
         var inject =
           `
         <!DOCTYPE html>
-        <script id="${injectedJsId}">
-        ${((!hasProxyHintCook) ? proxyHintInjection : "")}
-        ${httpRequestInjection}
-        </script>
+        <script>
+        
+
+
+
+        // the proxy hint must be written as a single IIFE, or it will show error in example.com   idk what's wrong
+        (function () {
+          // proxy hint
+          ${((!hasProxyHintCook) ? proxyHintInjection : "")}
+        })();
+
+
+
+
+        (function () {
+          // hooks stuff - Must before convert path functions
+          // it defines all necessary variables
+          ${httpRequestInjection}
+
+
+          // Convert path functions
+          ${htmlCovPathInject}
+
+          // Invoke the functioon
+
+
+          // ****************************************************************************
+          // it HAVE to be encoded because html will parse the </scri... tag inside script
+          
+          
+          const originalBodyBase64Encoded = "${new TextEncoder().encode(bd)}";
+
+
+          const bytes = new Uint8Array(originalBodyBase64Encoded.split(',').map(Number));
+
+
+
+          // help me debug
+          console.log(
+            '%c' + 'Debug code start',
+            'color: blue; font-size: 15px;'
+          );
+          console.log(
+            '%c' + new TextDecoder().decode(bytes),
+            'color: green; font-size: 10px; padding:5px;'
+          );
+          console.log(
+            '%c' + 'Debug code end',
+            'color: blue; font-size: 15px;'
+          );
+
+
+          ${htmlCovPathInjectFuncName}(new TextDecoder().decode(bytes));
+        
+        
+
+
+        })();
+          </script>
         `;
 
         // <script id="inj">document.getElementById("inj").remove();</script>
@@ -1062,24 +1148,43 @@ async function handleRequest(request) {
 
 
         bd = (hasBom ? "\uFEFF" : "") + //第一个是零宽度不间断空格，第二个是空
-          inject +
-          bd;
-
+          inject
+          // + bd
+          ;
+      }
+      // =======================================================================================
+      // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果不是 HTML，就 Regex 替换掉链接 *-*
+      // =======================================================================================
+      else {
+        //ChatGPT 替换里面的链接
+        let regex = new RegExp(`(?<!src="|href=")(https?:\\/\\/[^\s'"]+)`, 'g');
+        bd = bd.replace(regex, (match) => {
+          if (match.startsWith("http")) {
+            return thisProxyServerUrlHttps + match;
+          } else {
+            return thisProxyServerUrl_hostOnly + "/" + match;
+          }
+        });
       }
 
-      // 问题:在设置css background image 的时候可以使用相对目录  
+      // ***************************************************
+      // ***************************************************
+      // ***************************************************
+      // 问题:在设置css background image 的时候可以使用相对目录 
+      // ***************************************************
+ 
 
       modifiedResponse = new Response(bd, response);
-    } 
-    
+    }
+
     // =======================================================================================
     // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果 Body 不是 Text （i.g. Binary） *-*-*-*-*-*-*
     // =======================================================================================
     else {
       modifiedResponse = new Response(response.body, response);
     }
-  } 
-  
+  }
+
   // =======================================================================================
   // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果没有 Body *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
   // =======================================================================================
@@ -1142,7 +1247,7 @@ async function handleRequest(request) {
     });
   }
   //bd != null && bd.includes("<html")
-  if (contentType && contentType.includes("text/html") && response.status == 200 && bd.includes("<html")) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+  if (isHTML && response.status == 200) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
     let cookieValue = lastVisitProxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
     //origin末尾不带/
     //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
@@ -1169,7 +1274,7 @@ async function handleRequest(request) {
   // =======================================================================================
   // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 删除部分限制性的 Header *-*-*-*-*-*-*-*-*-*-*-*-*
   // =======================================================================================
-  
+
   // 添加允许跨域访问的响应头
   //modifiedResponse.headers.set("Content-Security-Policy", "default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; media-src *; frame-src *; font-src *; connect-src *; base-uri *; form-action *;");
 
