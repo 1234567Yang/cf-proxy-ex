@@ -87,13 +87,13 @@ function changeURL(relativePath){
   }
   try {
     var absolutePath = new URL(relativePath, original_website_url_str).href; //获取绝对路径
-    absolutePath = absolutePath.replace(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
-    absolutePath = absolutePath.replace(encodeURI(window.location.href), encodeURI(original_website_url_str));
-    absolutePath = absolutePath.replace(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
+    absolutePath = absolutePath.replaceAll(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
+    absolutePath = absolutePath.replaceAll(encodeURI(window.location.href), encodeURI(original_website_url_str));
+    absolutePath = absolutePath.replaceAll(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
 
-    absolutePath = absolutePath.replace(proxy_host, original_website_host);
-    absolutePath = absolutePath.replace(encodeURI(proxy_host), encodeURI(original_website_host));
-    absolutePath = absolutePath.replace(encodeURIComponent(proxy_host), encodeURIComponent(original_website_host));
+    absolutePath = absolutePath.replaceAll(proxy_host, original_website_host);
+    absolutePath = absolutePath.replaceAll(encodeURI(proxy_host), encodeURI(original_website_host));
+    absolutePath = absolutePath.replaceAll(encodeURIComponent(proxy_host), encodeURIComponent(original_website_host));
 
     absolutePath = proxy_host_with_schema + absolutePath;
     return absolutePath;
@@ -437,6 +437,7 @@ function historyInject(){
 
 
     //给ipinfo.io的补丁：历史会设置一个https:/ipinfo.io，可能是他们获取了href，然后想设置根目录
+    // *** 这里不需要 replaceAll，因为只是第一个需要替换 ***
     if(url_str.startsWith("/" + original_website_url.href.replace("://", ":/"))) url_str = url_str.substring(("/" + original_website_url.href.replace("://", ":/")).length); // https://example.com/
     if(url_str.startsWith("/" + original_website_url.href.substring(0, original_website_url.href.length - 1).replace("://", ":/"))) url_str = url_str.substring(("/" + original_website_url.href).replace("://", ":/").length - 1); // https://example.com (没有/在最后)
 
@@ -677,7 +678,7 @@ function replaceContentPaths(content){
   // 这里写四个 \ 是因为 Server side 的文本也会把它当成转义符
 
 
-  content = content.replace(regex, (match) => {
+  content = content.replaceAll(regex, (match) => {
     if (match.startsWith("http")) {
       return proxy_host_with_schema + match;
     } else {
@@ -1155,7 +1156,7 @@ async function handleRequest(request) {
       else {
         //ChatGPT 替换里面的链接
         let regex = new RegExp(`(?<!src="|href=")(https?:\\/\\/[^\s'"]+)`, 'g');
-        bd = bd.replace(regex, (match) => {
+        bd = bd.replaceAll(regex, (match) => {
           if (match.startsWith("http")) {
             return thisProxyServerUrlHttps + match;
           } else {
@@ -1334,15 +1335,14 @@ async function handleRequest(request) {
 
   return modifiedResponse;
 }
-function escapeRegExp(string) {
-  return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& 表示匹配的字符
-}
 
 //https://stackoverflow.com/questions/5142337/read-a-javascript-cookie-by-name
 function getCook(cookiename, cookies) {
   // Get name followed by anything except a semicolon
   var cookiestring = RegExp(cookiename + "=[^;]+").exec(cookies);
   // Return everything after the equal sign, or an empty string if the cookie name not found
+
+  // 这个正则表达式中的 ^ 表示字符串开头，一个字符串只有一个开头，所以这个正则最多只能匹配一次。因此 replace() 和 replaceAll() 的效果完全相同。
   return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./, "") : "");
 }
 
@@ -1376,12 +1376,9 @@ function covToAbs_ServerSide(body, requestPathNow) {
     }
   }
   for (var i = 0; i < original.length; i++) {
-    body = body.replace(original[i], target[i]);
+    body = body.replaceAll(original[i], target[i]);
   }
   return body;
-}
-function removeIntegrityAttributes(body) {
-  return body.replace(/integrity=("|')([^"']*)("|')/g, '');
 }
 
 // console.log(isPosEmbed("<script src='https://www.google.com/'>uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu</script>",2));
