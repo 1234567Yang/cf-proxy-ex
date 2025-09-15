@@ -1306,10 +1306,30 @@ async function handleRequest(request) {
   });
 
 
+  modifiedResponse.headers.forEach((value, key) => {
+    console.log(key + "**************************************" + value);
+    // 检查头部值是否以代理地址开头
+    if (value.startsWith(thisProxyServerUrlHttps)) {
+      const newValue = value.substring(thisProxyServerUrlHttps.length);
+
+      modifiedResponse.headers.set(key, newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host));
+    }else{
+      modifiedResponse.headers.set(key, value.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host));
+    }
+  });
+
+
+
+
+
   if (!hasProxyHintCook) {
     //设置content立刻过期，防止多次弹代理警告（但是如果是Content-no-change还是会弹出）
     modifiedResponse.headers.set("Cache-Control", "max-age=0");
   }
+  
+
+
+  
 
 
   return modifiedResponse;
