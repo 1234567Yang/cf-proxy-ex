@@ -73,12 +73,27 @@ function changeURL(relativePath){
   try{
     if(relativePath.startsWith("data:") || relativePath.startsWith("mailto:") || relativePath.startsWith("javascript:") || relativePath.startsWith("chrome") || relativePath.startsWith("edge")) return relativePath;
   }catch{
-    // duckduckgo mysterious BUG that will trigger sometimes, just ignore ...
+    console.log("Change URL Error **************************************:");
+    console.log(relativePath);
+    console.log(typeof relativePath);
+
+    return relativePath;
   }
+
+
+  // for example, blob:https://example.com/, we need to remove blob and add it back later
+  var pathAfterAdd = "";
+
+  if(relativePath.startsWith("blob:")){
+    pathAfterAdd = "blob:";
+    relativePath = relativePath.substring("blob:".length);
+  }
+
+
   try{
-    if(relativePath && relativePath.startsWith(proxy_host_with_schema)) relativePath = relativePath.substring(proxy_host_with_schema.length);
-    if(relativePath && relativePath.startsWith(proxy_host + "/")) relativePath = relativePath.substring(proxy_host.length + 1);
-    if(relativePath && relativePath.startsWith(proxy_host)) relativePath = relativePath.substring(proxy_host.length);
+    if(relativePath.startsWith(proxy_host_with_schema)) relativePath = relativePath.substring(proxy_host_with_schema.length);
+    if(relativePath.startsWith(proxy_host + "/")) relativePath = relativePath.substring(proxy_host.length + 1);
+    if(relativePath.startsWith(proxy_host)) relativePath = relativePath.substring(proxy_host.length);
 
     // 把relativePath去除掉当前代理的地址 https://proxy.com/ ， relative path成为 被代理的（相对）地址，target_website.com/path
 
@@ -96,10 +111,18 @@ function changeURL(relativePath){
     absolutePath = absolutePath.replaceAll(encodeURIComponent(proxy_host), encodeURIComponent(original_website_host));
 
     absolutePath = proxy_host_with_schema + absolutePath;
+
+
+
+    absolutePath = pathAfterAdd + absolutePath;
+
+
+
+
     return absolutePath;
   } catch (e) {
     console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-    return "";
+    return relativePath;
   }
 }
 
