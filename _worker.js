@@ -518,30 +518,97 @@ function traverseAndConvert(node) {
 }
 
 
-function covToAbs(element) {
-  var relativePath = "";
-  var setAttr = "";
-  if (element instanceof HTMLElement && element.hasAttribute("href")) {
-    relativePath = element.getAttribute("href");
-    setAttr = "href";
-  }
-  if (element instanceof HTMLElement && element.hasAttribute("src")) {
-    relativePath = element.getAttribute("src");
-    setAttr = "src";
-  }
+// ************************************************************************
+// ************************************************************************
+// Problem: img can also have srcset
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images
+// and link secret
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLLinkElement/imageSrcset
+// ************************************************************************
+// ************************************************************************
 
-  // Check and update the attribute if necessary
-  if (setAttr !== "" && relativePath.indexOf(proxy_host_with_schema) != 0) { 
-    if (!relativePath.includes("*")) {
-        try {
-          var absolutePath = changeURL(relativePath);
-          element.setAttribute(setAttr, absolutePath);
-        } catch (e) {
-          console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-        }
+function covToAbs(element) {
+  if(!(element instanceof HTMLElement)) return;
+  
+
+  if (element.hasAttribute("href")) {
+    relativePath = element.getAttribute("href");
+    try {
+      var absolutePath = changeURL(relativePath);
+      element.setAttribute("href", absolutePath);
+    } catch (e) {
+      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+      console.log(element);
     }
   }
+
+
+  if (element.hasAttribute("src")) {
+    relativePath = element.getAttribute("src");
+    try {
+      var absolutePath = changeURL(relativePath);
+      element.setAttribute("src", absolutePath);
+    } catch (e) {
+      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+      console.log(element);
+    }
+  }
+
+
+  if (element.tagName === "FORM" && element.hasAttribute("action")) {
+    relativePath = element.getAttribute("action");
+    try {
+      var absolutePath = changeURL(relativePath);
+      element.setAttribute("action", absolutePath);
+    } catch (e) {
+      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+      console.log(element);
+    }
+  }
+
+
+  if (element.tagName === "SOURCE" && element.hasAttribute("srcset")) {
+    relativePath = element.getAttribute("srcset");
+    try {
+      var absolutePath = changeURL(relativePath);
+      element.setAttribute("srcset", absolutePath);
+    } catch (e) {
+      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+      console.log(element);
+    }
+  }
+
+
+  // 视频的封面图
+  if ((element.tagName === "VIDEO" || element.tagName === "AUDIO") && element.hasAttribute("poster")) {
+    relativePath = element.getAttribute("poster");
+    try {
+      var absolutePath = changeURL(relativePath);
+      element.setAttribute("poster", absolutePath);
+    } catch (e) {
+      console.log("Exception occured: " + e.message);
+    }
+  }
+
+
+
+  if (element.tagName === "OBJECT" && element.hasAttribute("data")) {
+    relativePath = element.getAttribute("data");
+    try {
+      var absolutePath = changeURL(relativePath);
+      element.setAttribute("data", absolutePath);
+    } catch (e) {
+      console.log("Exception occured: " + e.message);
+    }
+  }
+
+
+
+
+
 }
+
+
 function removeIntegrityAttributesFromElement(element){
   if (element.hasAttribute('integrity')) {
     element.removeAttribute('integrity');
