@@ -20,33 +20,33 @@ var thisProxyServerUrl_hostOnly;
 const proxyHintInjection = `
 
 function toEntities(str) {
-  return str.split("").map(ch => \`&#\${ch.charCodeAt(0)};\`).join("");
+return str.split("").map(ch => \`&#\${ch.charCodeAt(0)};\`).join("");
 }
 
 
 //---***========================================***---提示使用代理---***========================================***---
 
 setTimeout(() => {
-  var hint = \`
+var hint = \`
 Warning: You are currently using a web proxy, so do not log in to any website. Click to close this hint. For further details, please visit the link below.
 警告：您当前正在使用网络代理，请勿登录任何网站。单击关闭此提示。详情请见以下链接。
 \`;
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    document.body.insertAdjacentHTML(
-      'afterbegin', 
-      \`<div style="position:fixed;left:0px;top:0px;width:100%;margin:0px;padding:0px;display:block;z-index:99999999999999999999999;user-select:none;cursor:pointer;" id="__PROXY_HINT_DIV__" onclick="document.getElementById('__PROXY_HINT_DIV__').remove();">
-        <span style="position:relative;display:block;width:calc(100% - 20px);min-height:30px;font-size:14px;color:yellow;background:rgb(180,0,0);text-align:center;border-radius:5px;padding-left:10px;padding-right:10px;padding-top:1px;padding-bottom:1px;">
-          \${toEntities(hint)}
-          <br>
-          <a href="https://github.com/1234567Yang/cf-proxy-ex/" style="color:rgb(250,250,180);">https://github.com/1234567Yang/cf-proxy-ex/</a>
-        </span>
-      </div>
-      \`
-    );
-  }else{
-    alert(hint + "https://github.com/1234567Yang/cf-proxy-ex");
-  }
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+document.body.insertAdjacentHTML(
+  'afterbegin', 
+  \`<div style="position:fixed;left:0px;top:0px;width:100%;margin:0px;padding:0px;display:block;z-index:99999999999999999999999;user-select:none;cursor:pointer;" id="__PROXY_HINT_DIV__" onclick="document.getElementById('__PROXY_HINT_DIV__').remove();">
+    <span style="position:relative;display:block;width:calc(100% - 20px);min-height:30px;font-size:14px;color:yellow;background:rgb(180,0,0);text-align:center;border-radius:5px;padding-left:10px;padding-right:10px;padding-top:1px;padding-bottom:1px;">
+      \${toEntities(hint)}
+      <br>
+      <a href="https://github.com/1234567Yang/cf-proxy-ex/" style="color:rgb(250,250,180);">https://github.com/1234567Yang/cf-proxy-ex/</a>
+    </span>
+  </div>
+  \`
+);
+}else{
+alert(hint + "https://github.com/1234567Yang/cf-proxy-ex");
+}
 }, 5000);
 
 `;
@@ -69,69 +69,69 @@ var original_website_host_with_schema = original_website_url_str.substring(0, or
 
 //---***========================================***---通用func---***========================================***---
 function changeURL(relativePath){
-  if(relativePath == null) return null;
-  try{
-    if(relativePath.startsWith("data:") || relativePath.startsWith("mailto:") || relativePath.startsWith("javascript:") || relativePath.startsWith("chrome") || relativePath.startsWith("edge")) return relativePath;
-  }catch{
-    console.log("Change URL Error **************************************:");
-    console.log(relativePath);
-    console.log(typeof relativePath);
+if(relativePath == null) return null;
+try{
+if(relativePath.startsWith("data:") || relativePath.startsWith("mailto:") || relativePath.startsWith("javascript:") || relativePath.startsWith("chrome") || relativePath.startsWith("edge")) return relativePath;
+}catch{
+console.log("Change URL Error **************************************:");
+console.log(relativePath);
+console.log(typeof relativePath);
 
-    return relativePath;
-  }
-
-
-  // for example, blob:https://example.com/, we need to remove blob and add it back later
-  var pathAfterAdd = "";
-
-  if(relativePath.startsWith("blob:")){
-    pathAfterAdd = "blob:";
-    relativePath = relativePath.substring("blob:".length);
-  }
+return relativePath;
+}
 
 
-  try{
-    if(relativePath.startsWith(proxy_host_with_schema)) relativePath = relativePath.substring(proxy_host_with_schema.length);
-    if(relativePath.startsWith(proxy_host + "/")) relativePath = relativePath.substring(proxy_host.length + 1);
-    if(relativePath.startsWith(proxy_host)) relativePath = relativePath.substring(proxy_host.length);
+// for example, blob:https://example.com/, we need to remove blob and add it back later
+var pathAfterAdd = "";
 
-    // 把relativePath去除掉当前代理的地址 https://proxy.com/ ， relative path成为 被代理的（相对）地址，target_website.com/path
-
-  }catch{
-    //ignore
-  }
-  try {
-    var absolutePath = new URL(relativePath, original_website_url_str).href; //获取绝对路径
-    absolutePath = absolutePath.replaceAll(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
-    absolutePath = absolutePath.replaceAll(encodeURI(window.location.href), encodeURI(original_website_url_str));
-    absolutePath = absolutePath.replaceAll(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
-
-    absolutePath = absolutePath.replaceAll(proxy_host, original_website_host);
-    absolutePath = absolutePath.replaceAll(encodeURI(proxy_host), encodeURI(original_website_host));
-    absolutePath = absolutePath.replaceAll(encodeURIComponent(proxy_host), encodeURIComponent(original_website_host));
-
-    absolutePath = proxy_host_with_schema + absolutePath;
+if(relativePath.startsWith("blob:")){
+pathAfterAdd = "blob:";
+relativePath = relativePath.substring("blob:".length);
+}
 
 
+try{
+if(relativePath.startsWith(proxy_host_with_schema)) relativePath = relativePath.substring(proxy_host_with_schema.length);
+if(relativePath.startsWith(proxy_host + "/")) relativePath = relativePath.substring(proxy_host.length + 1);
+if(relativePath.startsWith(proxy_host)) relativePath = relativePath.substring(proxy_host.length);
 
-    absolutePath = pathAfterAdd + absolutePath;
+// 把relativePath去除掉当前代理的地址 https://proxy.com/ ， relative path成为 被代理的（相对）地址，target_website.com/path
+
+}catch{
+//ignore
+}
+try {
+var absolutePath = new URL(relativePath, original_website_url_str).href; //获取绝对路径
+absolutePath = absolutePath.replaceAll(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
+absolutePath = absolutePath.replaceAll(encodeURI(window.location.href), encodeURI(original_website_url_str));
+absolutePath = absolutePath.replaceAll(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
+
+absolutePath = absolutePath.replaceAll(proxy_host, original_website_host);
+absolutePath = absolutePath.replaceAll(encodeURI(proxy_host), encodeURI(original_website_host));
+absolutePath = absolutePath.replaceAll(encodeURIComponent(proxy_host), encodeURIComponent(original_website_host));
+
+absolutePath = proxy_host_with_schema + absolutePath;
 
 
 
+absolutePath = pathAfterAdd + absolutePath;
 
-    return absolutePath;
-  } catch (e) {
-    console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-    return relativePath;
-  }
+
+
+
+return absolutePath;
+} catch (e) {
+console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+return relativePath;
+}
 }
 
 
 // change from https://proxy.com/https://target_website.com/a to https://target_website.com/a
 function getOriginalUrl(url){
-  if(url == null) return null;
-  if(url.startsWith(proxy_host_with_schema)) return url.substring(proxy_host_with_schema.length);
-  return url;
+if(url == null) return null;
+if(url.startsWith(proxy_host_with_schema)) return url.substring(proxy_host_with_schema.length);
+return url;
 }
 
 
@@ -1019,11 +1019,14 @@ async function handleRequest(request) {
 
   let clientHeaderWithChange = new Headers();
   //***代理发送数据的Header：修改部分header防止403 forbidden，要先修改，   因为添加Request之后header是只读的（***ChatGPT，未测试）
-  for (var pair of request.headers.entries()) {
-    //console.log(pair[0]+ ': '+ pair[1]);
-    clientHeaderWithChange.set(pair[0], pair[1].replaceAll(thisProxyServerUrlHttps, actualUrlStr).replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host));
-  }
-
+  request.headers.forEach((value, key) => {
+    var newValue = value.replaceAll(thisProxyServerUrlHttps + "http", "http");
+    //无论如何，https://proxy.com/ 都不应该作为https://proxy.com/https://original出现在header中，即使是在paramter里面，改为http也只会变为原先的URL
+    var newValue = newValue.replaceAll(thisProxyServerUrlHttps, `${actualUrl.protocol}//${actualUrl.hostname}/`); // 这是最后带 / 的
+    var newValue = newValue.replaceAll(thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1), `${actualUrl.protocol}//${actualUrl.hostname}`); // 这是最后不带 / 的
+    var newValue = newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host); // 仅替换 host
+    clientHeaderWithChange.set(key, newValue);
+  });
 
   // =======================================================================================
   // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 处理客户端发来的 Body *-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -1260,7 +1263,7 @@ async function handleRequest(request) {
       // ***************************************************
       // 问题:在设置css background image 的时候可以使用相对目录 
       // ***************************************************
- 
+
 
       modifiedResponse = new Response(bd, response);
     }
@@ -1397,17 +1400,15 @@ async function handleRequest(request) {
   });
 
 
-  modifiedResponse.headers.forEach((value, key) => {
-    console.log(key + "**************************************" + value);
-    // 检查头部值是否以代理地址开头
-    if (value.startsWith(thisProxyServerUrlHttps)) {
-      const newValue = value.substring(thisProxyServerUrlHttps.length);
-
-      modifiedResponse.headers.set(key, newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host));
-    }else{
-      modifiedResponse.headers.set(key, value.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host));
-    }
-  });
+  //************************************************************************************************
+  // ******************************************This need to be thouoght more carefully**************
+  //************************************ Now it will make google map not work if it's activated ****
+  //************************************************************************************************
+  // modifiedResponse.headers.forEach((value, key) => {
+  //   var newValue = value.replaceAll(`${actualUrl.protocol}//${actualUrl.hostname}/`, thisProxyServerUrlHttps); // 这是最后带 / 的
+  //   var newValue = newValue.replaceAll(`${actualUrl.protocol}//${actualUrl.hostname}`, thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1)); // 这是最后不带 / 的
+  //   modifiedResponse.headers.set(key, newValue); //.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host)
+  // });
 
 
 
@@ -1417,10 +1418,10 @@ async function handleRequest(request) {
     //设置content立刻过期，防止多次弹代理警告（但是如果是Content-no-change还是会弹出）
     modifiedResponse.headers.set("Cache-Control", "max-age=0");
   }
-  
 
 
-  
+
+
 
 
   return modifiedResponse;
