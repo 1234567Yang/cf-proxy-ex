@@ -69,31 +69,40 @@ var original_website_host_with_schema = original_website_url_str.substring(0, or
 
 //---***========================================***---通用func---***========================================***---
 function changeURL(relativePath){
-if(relativePath == null) return null;
+  if(relativePath == null) return null;
+
+  relativePath_str = "";
+  if (relativePath instanceof URL) {
+    relativePath_str = relativePath.href;
+  }else{
+    relativePath_str = relativePath.toString();
+  }
+
+
 try{
-if(relativePath.startsWith("data:") || relativePath.startsWith("mailto:") || relativePath.startsWith("javascript:") || relativePath.startsWith("chrome") || relativePath.startsWith("edge")) return relativePath;
+if(relativePath_str.startsWith("data:") || relativePath_str.startsWith("mailto:") || relativePath_str.startsWith("javascript:") || relativePath_str.startsWith("chrome") || relativePath_str.startsWith("edge")) return relativePath_str;
 }catch{
 console.log("Change URL Error **************************************:");
-console.log(relativePath);
-console.log(typeof relativePath);
+console.log(relativePath_str);
+console.log(typeof relativePath_str);
 
-return relativePath;
+return relativePath_str;
 }
 
 
 // for example, blob:https://example.com/, we need to remove blob and add it back later
 var pathAfterAdd = "";
 
-if(relativePath.startsWith("blob:")){
+if(relativePath_str.startsWith("blob:")){
 pathAfterAdd = "blob:";
-relativePath = relativePath.substring("blob:".length);
+relativePath_str = relativePath_str.substring("blob:".length);
 }
 
 
 try{
-if(relativePath.startsWith(proxy_host_with_schema)) relativePath = relativePath.substring(proxy_host_with_schema.length);
-if(relativePath.startsWith(proxy_host + "/")) relativePath = relativePath.substring(proxy_host.length + 1);
-if(relativePath.startsWith(proxy_host)) relativePath = relativePath.substring(proxy_host.length);
+if(relativePath_str.startsWith(proxy_host_with_schema)) relativePath_str = relativePath_str.substring(proxy_host_with_schema.length);
+if(relativePath_str.startsWith(proxy_host + "/")) relativePath_str = relativePath_str.substring(proxy_host.length + 1);
+if(relativePath_str.startsWith(proxy_host)) relativePath_str = relativePath_str.substring(proxy_host.length);
 
 // 把relativePath去除掉当前代理的地址 https://proxy.com/ ， relative path成为 被代理的（相对）地址，target_website.com/path
 
@@ -101,7 +110,7 @@ if(relativePath.startsWith(proxy_host)) relativePath = relativePath.substring(pr
 //ignore
 }
 try {
-var absolutePath = new URL(relativePath, original_website_url_str).href; //获取绝对路径
+var absolutePath = new URL(relativePath_str, original_website_url_str).href; //获取绝对路径
 absolutePath = absolutePath.replaceAll(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
 absolutePath = absolutePath.replaceAll(encodeURI(window.location.href), encodeURI(original_website_url_str));
 absolutePath = absolutePath.replaceAll(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
@@ -121,8 +130,8 @@ absolutePath = pathAfterAdd + absolutePath;
 
 return absolutePath;
 } catch (e) {
-console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-return relativePath;
+console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath_str);
+return relativePath_str;
 }
 }
 
