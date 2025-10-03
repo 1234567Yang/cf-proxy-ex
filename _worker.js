@@ -247,17 +247,39 @@ function elementPropertyInject(){
 
 
   //ChatGPT + personal modify
-  const descriptor = Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype, 'href');
-  Object.defineProperty(HTMLAnchorElement.prototype, 'href', {
-    get: function () {
-      const real = descriptor.get.call(this);
-      return getOriginalUrl(real);
-    },
-    set: function (val) {
-      descriptor.set.call(this, changeURL(val));
-    },
-    configurable: true
-  });
+  const setList = [
+    [HTMLAnchorElement, "href"],
+    [HTMLScriptElement, "src"],
+    [HTMLImageElement, "src"],
+    // [HTMLImageElement, "srcset"], // 注意 srcset 是特殊格式，可以先只处理 src
+    [HTMLLinkElement, "href"],
+    [HTMLIFrameElement, "src"],
+    [HTMLVideoElement, "src"],
+    [HTMLAudioElement, "src"],
+    [HTMLSourceElement, "src"],
+    // [HTMLSourceElement, "srcset"],
+    [HTMLObjectElement, "data"],
+    [HTMLFormElement, "action"],
+  ];
+  
+  for (const [whichElement, whichProperty] of setList) {
+    if (!whichElement || !whichElement.prototype) continue;
+    const descriptor = Object.getOwnPropertyDescriptor(whichElement.prototype, whichProperty);
+    if (!descriptor) continue;
+  
+    Object.defineProperty(whichElement.prototype, whichProperty, {
+      get: function () {
+        const real = descriptor.get.call(this);
+        return getOriginalUrl(real);
+      },
+      set: function (val) {
+        descriptor.set.call(this, changeURL(val));
+      },
+      configurable: true,
+    });
+  
+    console.log("Hooked " + whichElement.name + " " + whichProperty);
+  }
 
 
 
