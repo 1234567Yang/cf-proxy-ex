@@ -47,14 +47,18 @@ Password is `maga2028`
 
 * [在Deno上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md)
 * [在Cloudflare上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_cf_tutorial.md)
+* 自定义域名获取（可选但建议，更稳定）：
+  * 域名购买：
+    * https://porkbun.com/
+    * https://domain.com/
+    * 购买时可以按 `Ctrl + F`，搜索 `$0.`，**此类域名为一年即抛类型，注意关闭自动续费**。
 
 > [!WARNING]
 > 我强烈建议开启[安全密码](#安全密码)，不仅可以防止被扫描（你猜猜我扫出来多少），还可以防止网站爬虫爬取内容。<br>
 > 此外，设置子域名的时候，请不要设置成类似于`proxy.example.com`的格式，因为在TLS握手的时候（会明文发送SNI），很容易被识别出这是一个代理服务。建议使用看起来更常规、无 / 假 特定含义的子域名，例如 `cdn.example.com` 或 `img.example.com` 等，以降低被识别的风险。
 
-自定义域名获取（可选）：
-
-* 域名购买：https://porkbun.com/  https://domain.com/<br >购买时可以按 `Ctrl + F`，搜索 `$0.` 
+> [!NOTE]  
+> 如果部署失败（重定向、报错 等），请尝试完全复制粘贴 `_worker.js` 的内容，如果还是不行请删除 worker 并新建一个。
 
 # 安全密码
 安全密码利用Cookie，在设置了密码的情况下，会先检测是否有密码Cookie以及是否正确，如果不正确那么可以设置输入密码界面，或者直接403。密码Cookie默认名称为`passwordCookieName`，设置密码可以代码里搜索`const password = "";`并替换成你的密码。
