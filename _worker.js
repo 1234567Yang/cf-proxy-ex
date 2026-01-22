@@ -970,7 +970,7 @@ const mainPage = `
 <ul style="position:absolute;bottom:15px;text-align:center;">
 <li>
 <p>本代理为 <a href="https://github.com/1234567Yang/cf-proxy-ex" target="_blank">开源项目</a> / This is an <a href="https://github.com/1234567Yang/cf-proxy-ex" target="_blank">open source project</a></p>
-<p>感谢 <a href="https://github.com/Tayasui-rainnya" target="_blank">@Tayasui-rainnya</a> 的主页设计 / Thanks for <a href="https://github.com/Tayasui-rainnya" target="_blank">@Tayasui-rainnya</a>'s design of the home page</p>
+<p>感谢 <a href="https://github.com/Tayasui-rainnya" target="_blank">@Tayasui-rainnya</a> 的主页设计 / Thanks for <a href="https://github.com/Tayasui-rainnya" target="_blank">@Tayasui-rainnya</a>'s home page design</p>
 </li>
 </ul>
 
