@@ -819,86 +819,174 @@ function replaceContentPaths(content){
 
 
 const mainPage = `
-<!DOCTYPE html>
 <html>
 <head>
-  <style>
-    body{
-      background:rgb(150,10,10);
-      color:rgb(240,240,0);
-    }
-    a{
-      color:rgb(250,250,180);
-    }
-    del{
-      color:rgb(190,190,190);
-    }
-    .center{
-      text-align:center;
-    }
-    .important{
-      font-weight:bold;
-      font-size:27;
-    }
-    /* my style begins*/
-    form[id=urlForm] {
-        max-width: 340px;
-        min-width: 340px;
-        margin: 0 auto;
-     }
-    input[id=targetUrl] {
-        background-color: rgb(240,240,0);
-     }
-    button[id=jumpButton] {
-        background-color: rgb(240,240,0);
-     }
-  </style>
+    <meta charset="utf-8">
+    <title>Cf-proxy-ex</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* 内容从顶部开始 */
+            padding: 30px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin: 20px 0; /* 避免顶部溢出 */
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2);
+
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #008cba;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+        }
+
+        button:hover {
+            background-color: #005f5f;
+        }
+
+        ul {
+            margin-top: 20px;
+            list-style-type: none;
+            font-size: 14px;
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        a {
+            color: #008cba;
+            text-decoration: none;
+            cursor:pointer;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                justify-content: flex-start; /* 确保顶部不会溢出 */
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            .container {
+                padding: 15px;
+                margin-top: 10px; /* 调整顶部间距 */
+            }
+        }
+    </style>
 </head>
 <body>
-    <h3 class="center">
-        I made this project because some extreme annoying network filter software in my school, which is notorious "Goguardian", and now it is open source at <a href="https://github.com/1234567Yang/cf-proxy-ex/">https://github.com/1234567Yang/cf-proxy-ex/</a>.
-      </h3>
-      <br><br><br>
-      <ul style="font-size:25;">
-      <li class="important">How to use this proxy:<br>
-        Type the website you want to go to after the website's url, for example: <br>
-        https://the current url/github.com<br>OR<br>https://the current url/https://github.com</li>
-      </ul>
-        <form id="urlForm" onsubmit="redirectToProxy(event)">
-            <fieldset>
-                <legend>Proxy Everything</legend>
-                <label for="targetUrl">TargetUrl: <input type="text" id="targetUrl" placeholder="Enter the target URL here..."></label>
-                <button type="submit" id="jumpButton">Jump!</button>
-            </fieldset>
-        </form>
-        <script>
-            function redirectToProxy(event) {
-                event.preventDefault();
-                const targetUrl = document.getElementById('targetUrl').value.trim();
-                const currentOrigin = window.location.origin;
-                window.open(currentOrigin + '/' + targetUrl, '_blank');
-            }
-        </script>
-      <ul>
-        <li>If your browser show 400 bad request, please clear your browser cookie<br></li>
-        <li>Why I make this:<br> Because school blcok every website that I can find math / CS and other subjects' study material and question solutions. In the eyes of the school, China (and some other countries) seems to be outside the scope of this "world". They block access to server IP addresses in China and block access to Chinese search engines and video websites. Of course, some commonly used social software has also been blocked, which once made it impossible for me to send messages to my parents on campus. I don't think that's how it should be, so I'm going to fight it as hard as I can. I believe this will not only benefit myself, but a lot more people can get benefits.</li>
-        <li>If this website is blocked by your school: Setup a new one by your self.</li>
-        <li>Limitation:<br>Although I tried my best to make every website proxiable, there still might be pages or resources that can not be load, and the most important part is that <span class="important">YOU SHOULD NEVER LOGIN ANY ACCOUNT VIA ONLINE PROXY</span>.</li>
-      </ul>
+<div class="container">
+<form id="urlForm" onsubmit="redirectToProxy(event)">
+    <h1>Cf-proxy-ex</h1>
+    <label for="targetUrl">
+        <input type="text" id="targetUrl" placeholder="Enter the target website here...">
+    </label>
+    <button type="submit" id="jump"> Jump! </button>
+</form>
+</div>
 
-    <h3>
-        <br>
-        <span>Bypass the network blockade:</span>
-        <br><br>
-        <span>Traditional VPNs.</span>
-        <br><br>
-        <span>Bypass by proxy: You can buy a domain($1) and setup by yourself: </span><a href="https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md">how to setup a proxy</a><span>. Unless they use white list mode, this can always work.</span>
-        <br><br>
-        <span>Youtube video unblock: "Thanks" for Russia that they started to invade Ukraine and Google blocked the traffic from Russia, there are a LOT of mirror sites working. You can even <a href="https://github.com/iv-org/invidious">setup</a> one by yourself.</span>
-    </h3>
-    <p style="font-size:280px !important;width:100%;" class="center">
-        ☭
-    </p>
+<ul>
+  <li>
+      如何使用 / How to use
+      <br>
+      1. 在上方输入框输入要访问的网址 / Type the website link above
+      <br>
+      2.在代理网址后输入您要访问的网址 / Type the website link after the proxy website's link<br>
+  </li>
+  <br>
+  <li>若显示 400 Bad Request 错误，请清本网站Cookie / Please clear this website's cookie if it shows 400 Bad Request</li>
+  <br>
+  <li>由于部分网站有代码混淆，不能保证所有网页的功能或渲染正常 / Some website may perform malfunction due to JS/CSS obfuscation</li>
+  <br>
+  <li><strong>强烈不建议在镜像页面中登录账号 / Strongly discourage logging into any mirrored website</strong></li>
+  <br><br><br>
+  <li style="text-align:center;font-size: calc(100% + 2px);">
+      <br>
+      <a onclick="fillUrl('https://wikipedia.com/')">Wikipedia</a> |
+      <a onclick="fillUrl('https://github.com/')">GitHub</a> |
+      <a onclick="fillUrl('https://duckduckgo.com/')">DuckDuckGo</a> 
+  </li>
+  <br>
+
+
+</ul>
+
+<ul style="position:absolute;bottom:15px;text-align:center;">
+<li>
+<p>本代理为 <a href="https://github.com/1234567Yang/cf-proxy-ex" target="_blank">开源项目</a> / This is an <a href="https://github.com/1234567Yang/cf-proxy-ex" target="_blank">open source project</a></p>
+<p>感谢 <a href="https://github.com/Tayasui-rainnya" target="_blank">@Tayasui-rainnya</a> 的主页设计 / Thanks for <a href="https://github.com/Tayasui-rainnya" target="_blank">@Tayasui-rainnya</a>'s design of the home page</p>
+</li>
+</ul>
+
+
+<script>
+  function redirectToProxy(event) {
+      event.preventDefault();
+      const targetUrl = document.getElementById('targetUrl').value.trim().toLowerCase();
+      const currentOrigin = window.location.origin;
+      window.open(currentOrigin + '/' + targetUrl, '_blank');
+  }
+  function fillUrl(url) {
+    document.getElementById('targetUrl').value = url;
+    document.getElementById('jump').click();
+}
+</script>
 </body>
 </html>
 `;
