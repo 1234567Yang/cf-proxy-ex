@@ -1,0 +1,7 @@
+{
+  "name": "cf-proxy-ex",
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "sed -i \"s/const password = \\\"\\\";/const password = \\\"$PROXY_PASSWORD\\\";/\" _worker.js && npx wrangler deploy"
+  }
+}
