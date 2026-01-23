@@ -14,7 +14,7 @@
 [![Github Release](https://img.shields.io/github/v/release/1234567Yang/cf-proxy-ex)](https://github.com/1234567Yang/cf-proxy-ex/releases/latest)
 ![GitHub forks](https://img.shields.io/github/forks/1234567Yang/cf-proxy-ex)
 
-[💻 在线体验](#在线体验) &nbsp;| [⚒ 用法](#用法) &nbsp;| [🚀 快速开始](#快速开始) &nbsp;| [📈 基于原项目的改进](#基于原项目的改进) &nbsp;| [🔒 安全密码](#安全密码) &nbsp;| [📸 截图](#截图) &nbsp;| [📦 LICENSE](#license) &nbsp;| [📄 备注](#备注) &nbsp;| [👍 感谢](#感谢) &nbsp;| [⭐ Star History](#star-history)
+[💻 在线体验](#在线体验) &nbsp;| [⚒ 用法](#用法) &nbsp;| [🚀 快速开始](#快速开始) &nbsp;| [🔒 安全密码](#安全密码) &nbsp;| [📸 截图](#截图) &nbsp;| [📦 LICENSE](#license) &nbsp;| [📄 备注](#备注) &nbsp;| [👍 感谢](#感谢) &nbsp;| [⭐ Star History](#star-history)
 
 
 Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。现在已经支持多平台部署（因为改名为worker-proxy-ex太麻烦，于是保持原名）。
@@ -47,34 +47,18 @@ Password is `maga2028`
 
 * [在Deno上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md)
 * [在Cloudflare上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_cf_tutorial.md)
+* 自定义域名获取（可选但建议，更稳定）：
+  * 域名购买：
+    * https://porkbun.com/
+    * https://domain.com/
+    * 购买时可以按 `Ctrl + F`，搜索 `$0.`，**此类域名为一年即抛类型，注意关闭自动续费**。
 
 > [!WARNING]
 > 我强烈建议开启[安全密码](#安全密码)，不仅可以防止被扫描（你猜猜我扫出来多少），还可以防止网站爬虫爬取内容。<br>
 > 此外，设置子域名的时候，请不要设置成类似于`proxy.example.com`的格式，因为在TLS握手的时候（会明文发送SNI），很容易被识别出这是一个代理服务。建议使用看起来更常规、无 / 假 特定含义的子域名，例如 `cdn.example.com` 或 `img.example.com` 等，以降低被识别的风险。
 
-自定义域名获取（可选）：
-
 > [!NOTE]  
-> 请注意，免费域名我未经实际测试，只是转发消息，并且实际上应该很难获取
-
-* 免费域名申请：https://secure.nom.za/  https://nic.eu.org/   https://nic.ua
-* 不需要申请，link域名0元免费1年：https://dynadot.com/
-* 域名购买：https://porkbun.com/  https://domain.com/<br >购买时可以按 `Ctrl + F`，搜索 `$0.` 
-
-
-# 基于原项目的改进
-* 去掉`/proxy/`，方便使用。我看到有issue说了，但是作者说想添加引导界面，这个问题我也解决了。
-* 手动处理转跳事件（3XX），防止一些相对资源加载不出来。
-* 判断欲代理的网址是否以`http`开头，如果不是就自动加上。
-* 把Header里所有有关代理网址的信息全部换成要代理的网站的信息，防止某些网站阻止代理。
-* 相对路径全部转换绝对路径，方便加载资源（如JS，CSS等）。
-* Cookie作用域修改成仅当代理那个网站时，防止Cookie太大服务器发来400 bad request，同时也防止恶意网站获取所有Cookie。
-* 把`XMLHttpRequest`和`fetch`注入返回的HTML，这样也可以提交表单数据。
-* 把一个文档监视器注入到返回的HTML，这样有新的链接也可以相对转绝对。
-* 修改`Content-Security-Policy`和`X-Frame-Options`的Header，实现可代理Duckduckgo，同时也解决了一些网站打不开的问题。
-* 在返回的时候，如果是HTML，那么添加`"Content-Type": "text/html; charset=utf-8"`，防止一些较为古老的中文网站打开出现`锟斤拷`，`烫烫烫`的问题。
-* 添加最后访问网址的Cookie，可以解决搜素引擎搜素之后出现异常的情况，如：`https://the proxy/https://www.duckduckgo.com/`会转到`https://the proxy/?q=key`。
-* 优化了一些代码。
+> 如果部署失败（重定向、报错 等），请尝试完全复制粘贴 `_worker.js` 的内容，如果还是不行请删除 worker 并新建一个。
 
 # 安全密码
 安全密码利用Cookie，在设置了密码的情况下，会先检测是否有密码Cookie以及是否正确，如果不正确那么可以设置输入密码界面，或者直接403。密码Cookie默认名称为`passwordCookieName`，设置密码可以代码里搜索`const password = "";`并替换成你的密码。
