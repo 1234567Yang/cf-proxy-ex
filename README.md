@@ -27,6 +27,8 @@ Cloudflare超级代理，OpenAI/ChatGPT代理，Github加速，在线代理。�
 
 # 在线体验
 
+密码 123
+
 ### 首页
 https://y.demo.lhyang.org/
 ### Duckduckgo聊天
