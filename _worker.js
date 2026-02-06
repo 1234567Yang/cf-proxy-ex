@@ -989,41 +989,159 @@ const mainPage = `
 </body>
 </html>
 `;
-const pwdPage = `
+function getPwdPage(expireHours) {
+  return `
 <!DOCTYPE html>
 <html>
-    
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Required</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                background-color: #f5f5f7;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                width: 100vw;
+            }
+
+            .login-card {
+                background: white;
+                padding: 2.5rem;
+                border-radius: 18px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+                width: 100%;
+                max-width: 380px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            }
+
+            .login-card:hover {
+                transform: translateY(-5px);
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                color: #1d1d1f;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+            }
+
+            p {
+                color: #86868b;
+                font-size: 0.9rem;
+                margin-bottom: 2rem;
+            }
+
+            .input-group {
+                margin-bottom: 1.5rem;
+                text-align: left;
+            }
+
+            input[type="password"] {
+                width: 100%;
+                padding: 12px 16px;
+                border: 1px solid #d2d2d7;
+                border-radius: 12px;
+                font-size: 1rem;
+                outline: none;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                background-color: #fbfbfd;
+            }
+
+            input[type="password"]:focus {
+                border-color: #0071e3;
+                box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+            }
+
+            button {
+                width: 100%;
+                padding: 12px;
+                background-color: #0071e3;
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease, transform 0.1s ease;
+            }
+
+            button:hover {
+                background-color: #0077ed;
+            }
+
+            button:active {
+                transform: scale(0.98);
+            }
+
+            .footer {
+                margin-top: 2rem;
+                font-size: 0.8rem;
+                color: #86868b;
+            }
+
+            .footer a {
+                color: #0071e3;
+                text-decoration: none;
+            }
+
+            .footer a:hover {
+                text-decoration: underline;
+            }
+        </style>
         <script>
             function setPassword() {
                 try {
                     var cookieDomain = window.location.hostname;
                     var password = document.getElementById('password').value;
-                    var currentOrigin = window.location.origin;
-                    var oneWeekLater = new Date();
-                    oneWeekLater.setTime(oneWeekLater.getTime() + (7 * 24 * 60 * 60 * 1000)); // 一周的毫秒数
-                    document.cookie = "${passwordCookieName}" + "=" + encodeURIComponent(password) + "; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + cookieDomain;
-                    document.cookie = "${passwordCookieName}" + "=" + encodeURIComponent(password) + "; expires=" + oneWeekLater.toUTCString() + "; path=/; domain=" + cookieDomain;
+                    var expireTime = new Date();
+                    expireTime.setTime(expireTime.getTime() + (${expireHours} * 60 * 60 * 1000));
+                    // Clear existing cookie first
+                    document.cookie = "${passwordCookieName}" + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + cookieDomain;
+                    // Set new cookie
+                    document.cookie = "${passwordCookieName}" + "=" + encodeURIComponent(password) + "; expires=" + expireTime.toUTCString() + "; path=/; domain=" + cookieDomain;
                 } catch(e) {
                     alert(e.message);
                 }
-                //window.location.href = currentOrigin + "?" + oneWeekLater.toUTCString();
                 location.reload();
             }
+
+            document.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    setPassword();
+                }
+            });
         </script>
     </head>
     
     <body>
-        <div>
-            <input id="password" type="password" placeholder="Password">
+        <div class="login-card">
+            <h1>Cf-proxy-ex</h1>
+            <p>Please enter your password to continue</p>
+            <div class="input-group">
+                <input id="password" type="password" placeholder="Password" autofocus>
+            </div>
             <button onclick="setPassword()">
-                Submit
+                Login
             </button>
+            <div class="footer">
+                Powered by <a href="https://github.com/1234567Yang/cf-proxy-ex" target="_blank">cf-proxy-ex</a>
+            </div>
         </div>
     </body>
-
 </html>
 `;
+}
 const redirectError = `
 <html><head></head><body><h2>Error while redirecting: the website you want to access to may contain wrong redirect information, and we can not parse the info</h2></body></html>
 `;
@@ -1032,6 +1150,7 @@ const redirectError = `
 
 async function handleRequest(request, env, ctx, thisProxyServerUrlHttps, thisProxyServerUrl_hostOnly) {
   const password = env.PROXY_PASSWORD ?? "123";
+  const expireHours = parseInt(env.PASSWORD_EXPIRE_HOURS) || 168; // Default to 1 week (168 hours)
 
   // =======================================================================================
   // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 前置条件 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -1057,13 +1176,13 @@ async function handleRequest(request, env, ctx, thisProxyServerUrlHttps, thisPro
       const pwd = getCook(passwordCookieName, siteCookie);
       if (pwd != null && pwd != "") {
         if (pwd != password) {
-          return handleWrongPwd();
+          return handleWrongPwd(expireHours);
         }
       } else {
-        return handleWrongPwd();
+        return handleWrongPwd(expireHours);
       }
     } else {
-      return handleWrongPwd();
+      return handleWrongPwd(expireHours);
     }
 
   }
@@ -1610,9 +1729,9 @@ function isPosEmbed(html, pos) {
   return false;
 
 }
-function handleWrongPwd() {
+function handleWrongPwd(expireHours) {
   if (showPasswordPage) {
-    return getHTMLResponse(pwdPage);
+    return getHTMLResponse(getPwdPage(expireHours));
   } else {
     return getHTMLResponse("<h1>403 Forbidden</h1><br>You do not have access to view this webpage.");
   }

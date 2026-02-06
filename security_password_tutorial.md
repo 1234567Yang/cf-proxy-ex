@@ -16,7 +16,8 @@
 4. 在 **Environment Variables** (环境变量) 部分，点击 **Add variable** (添加变量)。
 5. **Variable name** (变量名称) 填入 `PROXY_PASSWORD`。
 6. **Value** (值) 填入您想设置的密码。
-7. 点击 **Save and deploy** (保存并部署)。
+7. (可选) 继续添加变量 `PASSWORD_EXPIRE_HOURS`，值为您想设置的过期时间（单位：小时）。例如填入 `24` 表示密码有效期为 24 小时。如果不设置，默认值为 `168` (7天)。
+8. 点击 **Save and deploy** (保存并部署)。
 
 这样设置后，程序会优先使用环境变量中的密码。
 

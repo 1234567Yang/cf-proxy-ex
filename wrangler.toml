@@ -6,3 +6,5 @@ compatibility_date = "2026-02-05"
 # PROXY_PASSWORD can be set via Cloudflare dashboard or wrangler secret
 # Example: wrangler secret put PROXY_PASSWORD
 # PROXY_PASSWORD = "your-password"
+# PASSWORD_EXPIRE_HOURS sets the password cookie expiration time in hours (default 168)
+# PASSWORD_EXPIRE_HOURS = 168

@@ -85,6 +85,7 @@ Password is `maga2028`
 
 **设置方式：**
 1. **环境变量 (推荐)**：在 Cloudflare 控制台添加 `PROXY_PASSWORD` 变量。 (如需关闭验证，请将变量值设为 `false` 或保持为空)
+   - 还可以设置 `PASSWORD_EXPIRE_HOURS` 变量来控制密码有效期（单位：小时）。默认值为 `168` 小时（7天）。
 2. **修改代码**：搜索 `const password =`，将默认的 `"123"` 替换为您的自定义密码。 (如需关闭验证，可设为 `""` 或 `"false"`)
 
 默认密码为 `123`。更多详细教程请 [点这里](https://github.com/1234567Yang/cf-proxy-ex/blob/main/security_password_tutorial.md)。
