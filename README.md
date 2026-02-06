@@ -46,17 +46,33 @@ Password is `maga2028`
 
 
 # 快速开始
-* 在 1.4 版本后启动了默认[安全密码](#安全密码)，默认密码为 `123`，感谢 <ruby>Bolster<rp>（</rp><rt>da sha bi</rt><rp>）</rp></ruby> 给我整不会了。
+
+在 1.4 版本后启用了默认[安全密码](#安全密码)，默认密码为 `123`。
 
 ![bolster](https://github.com/1234567Yang/cf-proxy-ex/blob/main/img/depoly/abuse_report.png)
 
-* [在Deno上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md)
-* [在Cloudflare上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_cf_tutorial.md)
+### 🚀 部署到 Cloudflare
+1. **一键部署**：点击下方按钮直接将项目部署到您的 Cloudflare Workers。
+   [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Gzmomo001/cf-proxy-ex)
+
+   Fork 仓库链接
+
+   [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/1234567Yang/cf-proxy-ex)
+  原作者仓库链接（merge 之后可以把fork 仓库的链接删掉）
+2. **配置环境变量 (推荐)**：
+   - 部署完成后，在 Cloudflare 控制台进入您的 Worker -> **设置** (Settings) -> **变量** (Variables)。
+   - 添加变量 `PROXY_PASSWORD`，填入您的自定义密码并点击“保存并部署”。
+   - *设置后将自动覆盖代码中的默认密码。*
+3. **更多说明**：参考 [Cloudflare 详细部署教程](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_cf_tutorial.md)。
+
+### 🦕 其他平台部署
+* [在 Deno 上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md)
+
+### 🌐 域名与优化 (建议)
 * 自定义域名获取（可选但建议，更稳定）：
-  * 域名购买：
-    * https://porkbun.com/
-    * https://domain.com/
-    * 购买时可以按 `Ctrl + F`，搜索 `$0.`，**此类域名为一年即抛类型，注意关闭自动续费**。
+  * **域名购买**：[Porkbun](https://porkbun.com/)、[Domain.com](https://domain.com/) 等。搜索 `$0.` 可找到廉价一年期域名。
+  * **学生优惠**：[GitHub Student Developer Pack](https://education.github.com/pack)（GitHub 学生包）免费提供多种后缀的域名（如 `.me`、`.tech` 等）。
+
 
 > [!WARNING]
 > 设置子域名的时候，请不要设置成类似于`proxy.example.com`的格式，因为在TLS握手的时候（会明文发送SNI），很容易被识别出这是一个代理服务。建议使用看起来更常规、无 / 假 特定含义的子域名，例如 `cdn.example.com` 或 `img.example.com` 等，以降低被识别的风险。
@@ -65,8 +81,13 @@ Password is `maga2028`
 > 如果部署失败（重定向、报错 等），请尝试完全复制粘贴 `_worker.js` 的内容，如果还是不行请删除 worker 并新建一个。
 
 # 安全密码
-安全密码利用Cookie，在设置了密码的情况下，会先检测是否有密码Cookie以及是否正确，如果不正确那么可以设置输入密码界面，或者直接403。密码Cookie默认名称为`passwordCookieName`，设置密码可以代码里搜索`const password = "";`并替换成你的密码。
-更详细的教程可以[点这里](https://github.com/1234567Yang/cf-proxy-ex/blob/main/security_password_tutorial.md)。
+安全密码利用 Cookie 验证。系统会检测是否存在正确的密码 Cookie，否则将显示登录页面或返回 403。
+
+**设置方式：**
+1. **环境变量 (推荐)**：在 Cloudflare 控制台添加 `PROXY_PASSWORD` 变量。 (如需关闭验证，请将变量值设为 `false` 或保持为空)
+2. **修改代码**：搜索 `const password =`，将默认的 `"123"` 替换为您的自定义密码。 (如需关闭验证，可设为 `""` 或 `"false"`)
+
+默认密码为 `123`。更多详细教程请 [点这里](https://github.com/1234567Yang/cf-proxy-ex/blob/main/security_password_tutorial.md)。
 
 # 截图
 ![Duckduckgo](img/duckduckgo.jpg)

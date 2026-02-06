@@ -1,0 +1,7 @@
+opencode.json
+.envrc
+.serena
+.dev.vars
+AGENTS.md
+node_modules
+.wrangler
