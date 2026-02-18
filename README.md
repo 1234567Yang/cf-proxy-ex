@@ -62,7 +62,7 @@ Password is `maga2028`
 > 设置子域名的时候，请不要设置成类似于`proxy.example.com`的格式，因为在TLS握手的时候（会明文发送SNI），很容易被识别出这是一个代理服务。建议使用看起来更常规、无 / 假 特定含义的子域名，例如 `cdn.example.com` 或 `img.example.com` 等，以降低被识别的风险。
 
 > [!NOTE]  
-> 如果部署失败（重定向、报错 等），请尝试完全复制粘贴 `_worker.js` 的内容，如果还是不行请删除 worker 并新建一个。
+> 如果部署失败（重定向、报错 等），请参考 [FAQ](FAQ.md)
 
 # 安全密码
 安全密码利用Cookie，在设置了密码的情况下，会先检测是否有密码Cookie以及是否正确，如果不正确那么可以设置输入密码界面，或者直接403。密码Cookie默认名称为`passwordCookieName`，设置密码可以代码里搜索`const password = "";`并替换成你的密码。
