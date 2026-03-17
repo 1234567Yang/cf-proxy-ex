@@ -52,7 +52,6 @@ alert(hint + "https://github.com/1234567Yang/cf-proxy-ex");
 `;
 const httpRequestInjection = `
 
-
 //---***========================================***---information---***========================================***---
 var nowURL = new URL(window.location.href);
 var proxy_host = nowURL.host; //代理的host - proxy.com
@@ -68,231 +67,248 @@ var original_website_host_with_schema = original_website_url_str.substring(0, or
 
 
 //---***========================================***---通用func---***========================================***---
-function changeURL(relativePath){
-  if(relativePath == null) return null;
+function changeURL(relativePath) {
+    if (relativePath == null) return null;
 
-  relativePath_str = "";
-  if (relativePath instanceof URL) {
-    relativePath_str = relativePath.href;
-  }else{
-    relativePath_str = relativePath.toString();
-  }
-
-
-try{
-if(relativePath_str.startsWith("data:") || relativePath_str.startsWith("mailto:") || relativePath_str.startsWith("javascript:") || relativePath_str.startsWith("chrome") || relativePath_str.startsWith("edge")) return relativePath_str;
-}catch{
-console.log("Change URL Error **************************************:");
-console.log(relativePath_str);
-console.log(typeof relativePath_str);
-
-return relativePath_str;
-}
+    relativePath_str = "";
+    if (relativePath instanceof URL) {
+        relativePath_str = relativePath.href;
+    } else {
+        relativePath_str = relativePath.toString();
+    }
 
 
-// for example, blob:https://example.com/, we need to remove blob and add it back later
-var pathAfterAdd = "";
+    try {
+        if (relativePath_str.startsWith("data:") || relativePath_str.startsWith("mailto:") || relativePath_str.startsWith("javascript:") || relativePath_str.startsWith("chrome") || relativePath_str.startsWith("edge")) return relativePath_str;
+    } catch {
+        console.log("Change URL Error **************************************:");
+        console.log(relativePath_str);
+        console.log(typeof relativePath_str);
 
-if(relativePath_str.startsWith("blob:")){
-pathAfterAdd = "blob:";
-relativePath_str = relativePath_str.substring("blob:".length);
-}
-
-
-try{
-if(relativePath_str.startsWith(proxy_host_with_schema)) relativePath_str = relativePath_str.substring(proxy_host_with_schema.length);
-if(relativePath_str.startsWith(proxy_host + "/")) relativePath_str = relativePath_str.substring(proxy_host.length + 1);
-if(relativePath_str.startsWith(proxy_host)) relativePath_str = relativePath_str.substring(proxy_host.length);
-
-// 把relativePath去除掉当前代理的地址 https://proxy.com/ ， relative path成为 被代理的（相对）地址，target_website.com/path
-
-}catch{
-//ignore
-}
-try {
-var absolutePath = new URL(relativePath_str, original_website_url_str).href; //获取绝对路径
-absolutePath = absolutePath.replaceAll(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
-absolutePath = absolutePath.replaceAll(encodeURI(window.location.href), encodeURI(original_website_url_str));
-absolutePath = absolutePath.replaceAll(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
-
-absolutePath = absolutePath.replaceAll(proxy_host, original_website_host);
-absolutePath = absolutePath.replaceAll(encodeURI(proxy_host), encodeURI(original_website_host));
-absolutePath = absolutePath.replaceAll(encodeURIComponent(proxy_host), encodeURIComponent(original_website_host));
-
-absolutePath = proxy_host_with_schema + absolutePath;
+        return relativePath_str;
+    }
 
 
+    // for example, blob:https://example.com/, we need to remove blob and add it back later
+    var pathAfterAdd = "";
 
-absolutePath = pathAfterAdd + absolutePath;
+    if (relativePath_str.startsWith("blob:")) {
+        pathAfterAdd = "blob:";
+        relativePath_str = relativePath_str.substring("blob:".length);
+    }
+
+
+    try {
+        // 把relativePath去除掉当前代理的地址 https://proxy.com/ ， relative path成为 被代理的（相对）地址，target_website.com/path
+        let startWithLs = [proxy_host_with_schema, proxy_host + "/", proxy_host]
+
+        startWithLs.forEach(x => {
+            if (relativePath_str.startsWith(x)) relativePath_str = relativePath_str.substring(x.length);
+        });
+        // 如果是 /https://proxy.com/ 也去掉
+        startWithLs.forEach(x => {
+            x = "/" + x;
+            if (relativePath_str.startsWith(x)) relativePath_str = relativePath_str.substring(x.length);
+        });
+
+
+        // 修复： Original: /https://www.google.com/recaptcha/enterprise/reload?k=6LfwuyUTAAAAAOAmoS0fdqijC2PbbdH4kjq62Y1b
+        let enhancedStartRm = [original_website_host_with_schema.substring(0, original_website_host_with_schema.length - 1), original_website_host]
+        // substring 去除掉末尾的 /
+        // 原因：relativePath_str 在去掉 /https://www.google.com/ 后变成了 recaptcha/enterprise/reload?k=...（没有前导 /）。
+        enhancedStartRm.forEach(x => {
+            x = "/" + x;
+            if (relativePath_str.startsWith(x)) relativePath_str = relativePath_str.substring(x.length);
+            console.log("Replacing: " + x + "   The replaced: " + relativePath_str);
+        });
+    } catch {
+        //ignore
+    }
+    try {
+        console.log("relativePath_str: " + relativePath_str + "; original_website_url_str: " + original_website_url_str);
+        var absolutePath = new URL(relativePath_str, original_website_url_str).href; //获取绝对路径
+        absolutePath = absolutePath.replaceAll(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
+        absolutePath = absolutePath.replaceAll(encodeURI(window.location.href), encodeURI(original_website_url_str));
+        absolutePath = absolutePath.replaceAll(encodeURIComponent(window.location.href), encodeURIComponent(original_website_url_str));
+
+        absolutePath = absolutePath.replaceAll(proxy_host, original_website_host);
+        absolutePath = absolutePath.replaceAll(encodeURI(proxy_host), encodeURI(original_website_host));
+        absolutePath = absolutePath.replaceAll(encodeURIComponent(proxy_host), encodeURIComponent(original_website_host));
+
+        absolutePath = proxy_host_with_schema + absolutePath;
+
+
+
+        absolutePath = pathAfterAdd + absolutePath;
 
 
 
 
-return absolutePath;
-} catch (e) {
-console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath_str);
-return relativePath_str;
-}
+        return absolutePath;
+    } catch (e) {
+        console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath_str);
+        return relativePath_str;
+    }
 }
 
 
 // change from https://proxy.com/https://target_website.com/a to https://target_website.com/a
-function getOriginalUrl(url){
-if(url == null) return null;
-if(url.startsWith(proxy_host_with_schema)) return url.substring(proxy_host_with_schema.length);
-return url;
+function getOriginalUrl(url) {
+    if (url == null) return null;
+    if (url.startsWith(proxy_host_with_schema)) return url.substring(proxy_host_with_schema.length);
+    return url;
 }
 
 
 
 
 //---***========================================***---注入网络---***========================================***---
-function networkInject(){
-  //inject network request
-  var originalOpen = XMLHttpRequest.prototype.open;
-  var originalFetch = window.fetch;
-  XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+function networkInject() {
+    //inject network request
+    var originalOpen = XMLHttpRequest.prototype.open;
+    var originalFetch = window.fetch;
+    XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
 
-    console.log("Original: " + url);
+        console.log("Original: " + url);
 
-    url = changeURL(url);
-    
-    console.log("R:" + url);
-    return originalOpen.apply(this, arguments);
-  };
+        url = changeURL(url);
 
-  window.fetch = function(input, init) {
-    var url;
-    if (typeof input === 'string') {
-      url = input;
-    } else if (input instanceof Request) {
-      url = input.url;
-    } else {
-      url = input;
-    }
+        console.log("R:" + url);
+        return originalOpen.apply(this, arguments);
+    };
 
-
-
-    url = changeURL(url);
+    window.fetch = function (input, init) {
+        var url;
+        if (typeof input === 'string') {
+            url = input;
+        } else if (input instanceof Request) {
+            url = input.url;
+        } else {
+            url = input;
+        }
 
 
 
-    console.log("R:" + url);
-    if (typeof input === 'string') {
-      return originalFetch(url, init);
-    } else {
-      const newRequest = new Request(url, input);
-      return originalFetch(newRequest, init);
-    }
-  };
-  
-  console.log("NETWORK REQUEST METHOD INJECTED");
+        url = changeURL(url);
+
+
+
+        console.log("R:" + url);
+        if (typeof input === 'string') {
+            return originalFetch(url, init);
+        } else {
+            const newRequest = new Request(url, input);
+            return originalFetch(newRequest, init);
+        }
+    };
+
+    console.log("NETWORK REQUEST METHOD INJECTED");
 }
 
 
 //---***========================================***---注入window.open---***========================================***---
-function windowOpenInject(){
-  const originalOpen = window.open;
+function windowOpenInject() {
+    const originalOpen = window.open;
 
-  // Override window.open function
-  window.open = function (url, name, specs) {
-      let modifiedUrl = changeURL(url);
-      return originalOpen.call(window, modifiedUrl, name, specs);
-  };
+    // Override window.open function
+    window.open = function (url, name, specs) {
+        let modifiedUrl = changeURL(url);
+        return originalOpen.call(window, modifiedUrl, name, specs);
+    };
 
-  console.log("WINDOW OPEN INJECTED");
+    console.log("WINDOW OPEN INJECTED");
 }
 
 
 //---***========================================***---注入append元素---***========================================***---
-function appendChildInject(){
-  const originalAppendChild = Node.prototype.appendChild;
-  Node.prototype.appendChild = function(child) {
-    try{
-      if(child.src){
-        child.src = changeURL(child.src);
-      }
-      if(child.href){
-        child.href = changeURL(child.href);
-      }
-    }catch{
-      //ignore
-    }
-    return originalAppendChild.call(this, child);
-};
-console.log("APPEND CHILD INJECTED");
+function appendChildInject() {
+    const originalAppendChild = Node.prototype.appendChild;
+    Node.prototype.appendChild = function (child) {
+        try {
+            if (child.src) {
+                child.src = changeURL(child.src);
+            }
+            if (child.href) {
+                child.href = changeURL(child.href);
+            }
+        } catch {
+            //ignore
+        }
+        return originalAppendChild.call(this, child);
+    };
+    console.log("APPEND CHILD INJECTED");
 }
 
 
 
 
 //---***========================================***---注入元素的src和href---***========================================***---
-function elementPropertyInject(){
-  const originalSetAttribute = HTMLElement.prototype.setAttribute;
-  HTMLElement.prototype.setAttribute = function (name, value) {
-      if (name == "src" || name == "href") {
-        value = changeURL(value);
-      }
-      originalSetAttribute.call(this, name, value);
-  };
+function elementPropertyInject() {
+    const originalSetAttribute = HTMLElement.prototype.setAttribute;
+    HTMLElement.prototype.setAttribute = function (name, value) {
+        if (name == "src" || name == "href") {
+            value = changeURL(value);
+        }
+        originalSetAttribute.call(this, name, value);
+    };
 
 
-  const originalGetAttribute = HTMLElement.prototype.getAttribute;
-  HTMLElement.prototype.getAttribute = function (name) {
-    const val = originalGetAttribute.call(this, name);
-    if (name == "href" || name == "src") {
-      return getOriginalUrl(val);
+    const originalGetAttribute = HTMLElement.prototype.getAttribute;
+    HTMLElement.prototype.getAttribute = function (name) {
+        const val = originalGetAttribute.call(this, name);
+        if (name == "href" || name == "src") {
+            return getOriginalUrl(val);
+        }
+        return val;
+    };
+
+
+
+    console.log("ELEMENT PROPERTY (get/set attribute) INJECTED");
+
+
+
+    // -------------------------------------
+
+
+    //ChatGPT + personal modify
+    const setList = [
+        [HTMLAnchorElement, "href"],
+        [HTMLScriptElement, "src"],
+        [HTMLImageElement, "src"],
+        // [HTMLImageElement, "srcset"], // 注意 srcset 是特殊格式，可以先只处理 src
+        [HTMLLinkElement, "href"],
+        [HTMLIFrameElement, "src"],
+        [HTMLVideoElement, "src"],
+        [HTMLAudioElement, "src"],
+        [HTMLSourceElement, "src"],
+        // [HTMLSourceElement, "srcset"],
+        [HTMLObjectElement, "data"],
+        [HTMLFormElement, "action"],
+    ];
+
+    for (const [whichElement, whichProperty] of setList) {
+        if (!whichElement || !whichElement.prototype) continue;
+        const descriptor = Object.getOwnPropertyDescriptor(whichElement.prototype, whichProperty);
+        if (!descriptor) continue;
+
+        Object.defineProperty(whichElement.prototype, whichProperty, {
+            get: function () {
+                const real = descriptor.get.call(this);
+                return getOriginalUrl(real);
+            },
+            set: function (val) {
+                descriptor.set.call(this, changeURL(val));
+            },
+            configurable: true,
+        });
+
+        console.log("Hooked " + whichElement.name + " " + whichProperty);
     }
-    return val;
-  };
 
 
 
-  console.log("ELEMENT PROPERTY (get/set attribute) INJECTED");
-
-
-
-  // -------------------------------------
-
-
-  //ChatGPT + personal modify
-  const setList = [
-    [HTMLAnchorElement, "href"],
-    [HTMLScriptElement, "src"],
-    [HTMLImageElement, "src"],
-    // [HTMLImageElement, "srcset"], // 注意 srcset 是特殊格式，可以先只处理 src
-    [HTMLLinkElement, "href"],
-    [HTMLIFrameElement, "src"],
-    [HTMLVideoElement, "src"],
-    [HTMLAudioElement, "src"],
-    [HTMLSourceElement, "src"],
-    // [HTMLSourceElement, "srcset"],
-    [HTMLObjectElement, "data"],
-    [HTMLFormElement, "action"],
-  ];
-  
-  for (const [whichElement, whichProperty] of setList) {
-    if (!whichElement || !whichElement.prototype) continue;
-    const descriptor = Object.getOwnPropertyDescriptor(whichElement.prototype, whichProperty);
-    if (!descriptor) continue;
-  
-    Object.defineProperty(whichElement.prototype, whichProperty, {
-      get: function () {
-        const real = descriptor.get.call(this);
-        return getOriginalUrl(real);
-      },
-      set: function (val) {
-        descriptor.set.call(this, changeURL(val));
-      },
-      configurable: true,
-    });
-  
-    console.log("Hooked " + whichElement.name + " " + whichProperty);
-  }
-
-
-
-  console.log("ELEMENT PROPERTY (src / href) INJECTED");
+    console.log("ELEMENT PROPERTY (src / href) INJECTED");
 }
 
 
@@ -300,151 +316,151 @@ function elementPropertyInject(){
 
 //---***========================================***---注入location---***========================================***---
 class ProxyLocation {
-  constructor(originalLocation) {
-      this.originalLocation = originalLocation;
-  }
+    constructor(originalLocation) {
+        this.originalLocation = originalLocation;
+    }
 
-  // 方法：重新加载页面
-  reload(forcedReload) {
-    this.originalLocation.reload(forcedReload);
-  }
+    // 方法：重新加载页面
+    reload(forcedReload) {
+        this.originalLocation.reload(forcedReload);
+    }
 
-  // 方法：替换当前页面
-  replace(url) {
-    this.originalLocation.replace(changeURL(url));
-  }
+    // 方法：替换当前页面
+    replace(url) {
+        this.originalLocation.replace(changeURL(url));
+    }
 
-  // 方法：分配一个新的 URL
-  assign(url) {
-    this.originalLocation.assign(changeURL(url));
-  }
+    // 方法：分配一个新的 URL
+    assign(url) {
+        this.originalLocation.assign(changeURL(url));
+    }
 
-  // 属性：获取和设置 href
-  get href() {
-    return original_website_url_str;
-  }
+    // 属性：获取和设置 href
+    get href() {
+        return original_website_url_str;
+    }
 
-  set href(url) {
-    this.originalLocation.href = changeURL(url);
-  }
+    set href(url) {
+        this.originalLocation.href = changeURL(url);
+    }
 
-  // 属性：获取和设置 protocol
-  get protocol() {
-    return original_website_url.protocol;
-  }
+    // 属性：获取和设置 protocol
+    get protocol() {
+        return original_website_url.protocol;
+    }
 
-  set protocol(value) {
-    original_website_url.protocol = value;
-    this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
-  }
+    set protocol(value) {
+        original_website_url.protocol = value;
+        this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
+    }
 
-  // 属性：获取和设置 host
-  get host() {
-    return original_website_url.host;
-  }
+    // 属性：获取和设置 host
+    get host() {
+        return original_website_url.host;
+    }
 
-  set host(value) {
-    original_website_url.host = value;
-    this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
-  }
+    set host(value) {
+        original_website_url.host = value;
+        this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
+    }
 
-  // 属性：获取和设置 hostname
-  get hostname() {
-    return original_website_url.hostname;
-  }
+    // 属性：获取和设置 hostname
+    get hostname() {
+        return original_website_url.hostname;
+    }
 
-  set hostname(value) {
-    original_website_url.hostname = value;
-    this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
-  }
+    set hostname(value) {
+        original_website_url.hostname = value;
+        this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
+    }
 
-  // 属性：获取和设置 port
-  get port() {
-    return original_website_url.port;
-  }
+    // 属性：获取和设置 port
+    get port() {
+        return original_website_url.port;
+    }
 
-  set port(value) {
-    original_website_url.port = value;
-    this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
-  }
+    set port(value) {
+        original_website_url.port = value;
+        this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
+    }
 
-  // 属性：获取和设置 pathname
-  get pathname() {
-    return original_website_url.pathname;
-  }
+    // 属性：获取和设置 pathname
+    get pathname() {
+        return original_website_url.pathname;
+    }
 
-  set pathname(value) {
-    original_website_url.pathname = value;
-    this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
-  }
+    set pathname(value) {
+        original_website_url.pathname = value;
+        this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
+    }
 
-  // 属性：获取和设置 search
-  get search() {
-    return original_website_url.search;
-  }
+    // 属性：获取和设置 search
+    get search() {
+        return original_website_url.search;
+    }
 
-  set search(value) {
-    original_website_url.search = value;
-    this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
-  }
+    set search(value) {
+        original_website_url.search = value;
+        this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
+    }
 
-  // 属性：获取和设置 hash
-  get hash() {
-    return original_website_url.hash;
-  }
+    // 属性：获取和设置 hash
+    get hash() {
+        return original_website_url.hash;
+    }
 
-  set hash(value) {
-    original_website_url.hash = value;
-    this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
-  }
+    set hash(value) {
+        original_website_url.hash = value;
+        this.originalLocation.href = proxy_host_with_schema + original_website_url.href;
+    }
 
-  // 属性：获取 origin
-  get origin() {
-    return original_website_url.origin;
-  }
+    // 属性：获取 origin
+    get origin() {
+        return original_website_url.origin;
+    }
 
-  toString() {
-    return this.originalLocation.href;
-  }
+    toString() {
+        return this.originalLocation.href;
+    }
 }
 
 
 
-function documentLocationInject(){
-  Object.defineProperty(document, 'URL', {
-    get: function () {
-        return original_website_url_str;
-    },
-    set: function (url) {
-        document.URL = changeURL(url);
-    }
-});
+function documentLocationInject() {
+    Object.defineProperty(document, 'URL', {
+        get: function () {
+            return original_website_url_str;
+        },
+        set: function (url) {
+            document.URL = changeURL(url);
+        }
+    });
 
-Object.defineProperty(document, '${replaceUrlObj}', {
-      get: function () {
-          return new ProxyLocation(window.location);
-      },  
-      set: function (url) {
-          window.location.href = changeURL(url);
-      }
-});
-console.log("LOCATION INJECTED");
+    Object.defineProperty(document, '${replaceUrlObj}', {
+        get: function () {
+            return new ProxyLocation(window.location);
+        },
+        set: function (url) {
+            window.location.href = changeURL(url);
+        }
+    });
+    console.log("LOCATION INJECTED");
 }
 
 
 
 function windowLocationInject() {
 
-  Object.defineProperty(window, '${replaceUrlObj}', {
-      get: function () {
-          return new ProxyLocation(window.location);
-      },
-      set: function (url) {
-          window.location.href = changeURL(url);
-      }
-  });
+    Object.defineProperty(window, '${replaceUrlObj}', {
+        get: function () {
+            return new ProxyLocation(window.location);
+        },
+        set: function (url) {
+            window.location.href = changeURL(url);
+        }
+    });
 
-  console.log("WINDOW LOCATION INJECTED");
+    console.log("WINDOW LOCATION INJECTED");
 }
 
 
@@ -456,67 +472,67 @@ function windowLocationInject() {
 
 
 //---***========================================***---注入历史---***========================================***---
-function historyInject(){
-  const originalPushState = History.prototype.pushState;
-  const originalReplaceState = History.prototype.replaceState;
+function historyInject() {
+    const originalPushState = History.prototype.pushState;
+    const originalReplaceState = History.prototype.replaceState;
 
-  History.prototype.pushState = function (state, title, url) {
-    if(!url) return; //x.com 会有一次undefined
-
-
-    if(url.startsWith("/" + original_website_url.href)) url = url.substring(("/" + original_website_url.href).length); // https://example.com/
-    if(url.startsWith("/" + original_website_url.href.substring(0, original_website_url.href.length - 1))) url = url.substring(("/" + original_website_url.href).length - 1); // https://example.com (没有/在最后)
-
-    
-    var u = changeURL(url);
-    return originalPushState.apply(this, [state, title, u]);
-  };
-
-  History.prototype.replaceState = function (state, title, url) {
-    console.log("History url started: " + url);
-    if(!url) return; //x.com 会有一次undefined
-
-    // console.log(Object.prototype.toString.call(url)); // [object URL] or string
+    History.prototype.pushState = function (state, title, url) {
+        if (!url) return; //x.com 会有一次undefined
 
 
-    let url_str = url.toString(); // 如果是 string，那么不会报错，如果是 [object URL] 会解决报错
+        if (url.startsWith("/" + original_website_url.href)) url = url.substring(("/" + original_website_url.href).length); // https://example.com/
+        if (url.startsWith("/" + original_website_url.href.substring(0, original_website_url.href.length - 1))) url = url.substring(("/" + original_website_url.href).length - 1); // https://example.com (没有/在最后)
 
 
-    //这是给duckduckgo专门的补丁，可能是window.location字样做了加密，导致服务器无法替换。
-    //正常链接它要设置的history是/，改为proxy之后变为/https://duckduckgo.com。
-    //但是这种解决方案并没有从“根源”上解决问题
+        var u = changeURL(url);
+        return originalPushState.apply(this, [state, title, u]);
+    };
 
-    if(url_str.startsWith("/" + original_website_url.href)) url_str = url_str.substring(("/" + original_website_url.href).length); // https://example.com/
-    if(url_str.startsWith("/" + original_website_url.href.substring(0, original_website_url.href.length - 1))) url_str = url_str.substring(("/" + original_website_url.href).length - 1); // https://example.com (没有/在最后)
+    History.prototype.replaceState = function (state, title, url) {
+        console.log("History url started: " + url);
+        if (!url) return; //x.com 会有一次undefined
 
-
-    //给ipinfo.io的补丁：历史会设置一个https:/ipinfo.io，可能是他们获取了href，然后想设置根目录
-    // *** 这里不需要 replaceAll，因为只是第一个需要替换 ***
-    if(url_str.startsWith("/" + original_website_url.href.replace("://", ":/"))) url_str = url_str.substring(("/" + original_website_url.href.replace("://", ":/")).length); // https://example.com/
-    if(url_str.startsWith("/" + original_website_url.href.substring(0, original_website_url.href.length - 1).replace("://", ":/"))) url_str = url_str.substring(("/" + original_website_url.href).replace("://", ":/").length - 1); // https://example.com (没有/在最后)
+        // console.log(Object.prototype.toString.call(url)); // [object URL] or string
 
 
+        let url_str = url.toString(); // 如果是 string，那么不会报错，如果是 [object URL] 会解决报错
 
-    var u = changeURL(url_str);
 
-    console.log("History url changed: " + u);
+        //这是给duckduckgo专门的补丁，可能是window.location字样做了加密，导致服务器无法替换。
+        //正常链接它要设置的history是/，改为proxy之后变为/https://duckduckgo.com。
+        //但是这种解决方案并没有从“根源”上解决问题
 
-    return originalReplaceState.apply(this, [state, title, u]);
-  };
+        if (url_str.startsWith("/" + original_website_url.href)) url_str = url_str.substring(("/" + original_website_url.href).length); // https://example.com/
+        if (url_str.startsWith("/" + original_website_url.href.substring(0, original_website_url.href.length - 1))) url_str = url_str.substring(("/" + original_website_url.href).length - 1); // https://example.com (没有/在最后)
 
-  History.prototype.back = function () {
-    return originalBack.apply(this);
-  };
 
-  History.prototype.forward = function () {
-    return originalForward.apply(this);
-  };
+        //给ipinfo.io的补丁：历史会设置一个https:/ipinfo.io，可能是他们获取了href，然后想设置根目录
+        // *** 这里不需要 replaceAll，因为只是第一个需要替换 ***
+        if (url_str.startsWith("/" + original_website_url.href.replace("://", ":/"))) url_str = url_str.substring(("/" + original_website_url.href.replace("://", ":/")).length); // https://example.com/
+        if (url_str.startsWith("/" + original_website_url.href.substring(0, original_website_url.href.length - 1).replace("://", ":/"))) url_str = url_str.substring(("/" + original_website_url.href).replace("://", ":/").length - 1); // https://example.com (没有/在最后)
 
-  History.prototype.go = function (delta) {
-    return originalGo.apply(this, [delta]);
-  };
 
-  console.log("HISTORY INJECTED");
+
+        var u = changeURL(url_str);
+
+        console.log("History url changed: " + u);
+
+        return originalReplaceState.apply(this, [state, title, u]);
+    };
+
+    History.prototype.back = function () {
+        return originalBack.apply(this);
+    };
+
+    History.prototype.forward = function () {
+        return originalForward.apply(this);
+    };
+
+    History.prototype.go = function (delta) {
+        return originalGo.apply(this, [delta]);
+    };
+
+    console.log("HISTORY INJECTED");
 }
 
 
@@ -526,26 +542,26 @@ function historyInject(){
 
 //---***========================================***---Hook观察界面---***========================================***---
 function obsPage() {
-  var yProxyObserver = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      traverseAndConvert(mutation);
+    var yProxyObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            traverseAndConvert(mutation);
+        });
     });
-  });
-  var config = { attributes: true, childList: true, subtree: true };
-  yProxyObserver.observe(document.body, config);
+    var config = { attributes: true, childList: true, subtree: true };
+    yProxyObserver.observe(document.body, config);
 
-  console.log("OBSERVING THE WEBPAGE...");
+    console.log("OBSERVING THE WEBPAGE...");
 }
 
 function traverseAndConvert(node) {
-  if (node instanceof HTMLElement) {
-    removeIntegrityAttributesFromElement(node);
-    covToAbs(node);
-    node.querySelectorAll('*').forEach(function(child) {
-      removeIntegrityAttributesFromElement(child);
-      covToAbs(child);
-    });
-  }
+    if (node instanceof HTMLElement) {
+        removeIntegrityAttributesFromElement(node);
+        covToAbs(node);
+        node.querySelectorAll('*').forEach(function (child) {
+            removeIntegrityAttributesFromElement(child);
+            covToAbs(child);
+        });
+    }
 }
 
 
@@ -559,79 +575,79 @@ function traverseAndConvert(node) {
 // ************************************************************************
 
 function covToAbs(element) {
-  if(!(element instanceof HTMLElement)) return;
-  
+    if (!(element instanceof HTMLElement)) return;
 
-  if (element.hasAttribute("href")) {
-    relativePath = element.getAttribute("href");
-    try {
-      var absolutePath = changeURL(relativePath);
-      element.setAttribute("href", absolutePath);
-    } catch (e) {
-      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-      console.log(element);
+
+    if (element.hasAttribute("href")) {
+        relativePath = element.getAttribute("href");
+        try {
+            var absolutePath = changeURL(relativePath);
+            element.setAttribute("href", absolutePath);
+        } catch (e) {
+            console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+            console.log(element);
+        }
     }
-  }
 
 
-  if (element.hasAttribute("src")) {
-    relativePath = element.getAttribute("src");
-    try {
-      var absolutePath = changeURL(relativePath);
-      element.setAttribute("src", absolutePath);
-    } catch (e) {
-      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-      console.log(element);
+    if (element.hasAttribute("src")) {
+        relativePath = element.getAttribute("src");
+        try {
+            var absolutePath = changeURL(relativePath);
+            element.setAttribute("src", absolutePath);
+        } catch (e) {
+            console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+            console.log(element);
+        }
     }
-  }
 
 
-  if (element.tagName === "FORM" && element.hasAttribute("action")) {
-    relativePath = element.getAttribute("action");
-    try {
-      var absolutePath = changeURL(relativePath);
-      element.setAttribute("action", absolutePath);
-    } catch (e) {
-      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-      console.log(element);
+    if (element.tagName === "FORM" && element.hasAttribute("action")) {
+        relativePath = element.getAttribute("action");
+        try {
+            var absolutePath = changeURL(relativePath);
+            element.setAttribute("action", absolutePath);
+        } catch (e) {
+            console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+            console.log(element);
+        }
     }
-  }
 
 
-  if (element.tagName === "SOURCE" && element.hasAttribute("srcset")) {
-    relativePath = element.getAttribute("srcset");
-    try {
-      var absolutePath = changeURL(relativePath);
-      element.setAttribute("srcset", absolutePath);
-    } catch (e) {
-      console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
-      console.log(element);
+    if (element.tagName === "SOURCE" && element.hasAttribute("srcset")) {
+        relativePath = element.getAttribute("srcset");
+        try {
+            var absolutePath = changeURL(relativePath);
+            element.setAttribute("srcset", absolutePath);
+        } catch (e) {
+            console.log("Exception occured: " + e.message + original_website_url_str + "   " + relativePath);
+            console.log(element);
+        }
     }
-  }
 
 
-  // 视频的封面图
-  if ((element.tagName === "VIDEO" || element.tagName === "AUDIO") && element.hasAttribute("poster")) {
-    relativePath = element.getAttribute("poster");
-    try {
-      var absolutePath = changeURL(relativePath);
-      element.setAttribute("poster", absolutePath);
-    } catch (e) {
-      console.log("Exception occured: " + e.message);
+    // 视频的封面图
+    if ((element.tagName === "VIDEO" || element.tagName === "AUDIO") && element.hasAttribute("poster")) {
+        relativePath = element.getAttribute("poster");
+        try {
+            var absolutePath = changeURL(relativePath);
+            element.setAttribute("poster", absolutePath);
+        } catch (e) {
+            console.log("Exception occured: " + e.message);
+        }
     }
-  }
 
 
 
-  if (element.tagName === "OBJECT" && element.hasAttribute("data")) {
-    relativePath = element.getAttribute("data");
-    try {
-      var absolutePath = changeURL(relativePath);
-      element.setAttribute("data", absolutePath);
-    } catch (e) {
-      console.log("Exception occured: " + e.message);
+    if (element.tagName === "OBJECT" && element.hasAttribute("data")) {
+        relativePath = element.getAttribute("data");
+        try {
+            var absolutePath = changeURL(relativePath);
+            element.setAttribute("data", absolutePath);
+        } catch (e) {
+            console.log("Exception occured: " + e.message);
+        }
     }
-  }
 
 
 
@@ -640,25 +656,25 @@ function covToAbs(element) {
 }
 
 
-function removeIntegrityAttributesFromElement(element){
-  if (element.hasAttribute('integrity')) {
-    element.removeAttribute('integrity');
-  }
+function removeIntegrityAttributesFromElement(element) {
+    if (element.hasAttribute('integrity')) {
+        element.removeAttribute('integrity');
+    }
 }
 //---***========================================***---Hook观察界面里面要用到的func---***========================================***---
-function loopAndConvertToAbs(){
-  for(var ele of document.querySelectorAll('*')){
-    removeIntegrityAttributesFromElement(ele);
-    covToAbs(ele);
-  }
-  console.log("LOOPED EVERY ELEMENT");
+function loopAndConvertToAbs() {
+    for (var ele of document.querySelectorAll('*')) {
+        removeIntegrityAttributesFromElement(ele);
+        covToAbs(ele);
+    }
+    console.log("LOOPED EVERY ELEMENT");
 }
 
-function covScript(){ //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
-  var scripts = document.getElementsByTagName('script');
-  for (var i = 0; i < scripts.length; i++) {
-    covToAbs(scripts[i]);
-  }
+function covScript() { //由于observer经过测试不会hook添加的script标签，也可能是我测试有问题？
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0; i < scripts.length; i++) {
+        covToAbs(scripts[i]);
+    }
     setTimeout(covScript, 3000);
 }
 
@@ -703,10 +719,10 @@ historyInject();
 
 //---***========================================***---在window.load之后的操作---***========================================***---
 window.addEventListener('load', () => {
-  loopAndConvertToAbs();
-  console.log("CONVERTING SCRIPT PATH");
-  obsPage();
-  covScript();
+    loopAndConvertToAbs();
+    console.log("CONVERTING SCRIPT PATH");
+    obsPage();
+    covScript();
 });
 console.log("WINDOW ONLOAD EVENT ADDED");
 
@@ -717,33 +733,31 @@ console.log("WINDOW ONLOAD EVENT ADDED");
 //---***========================================***---在window.error的时候---***========================================***---
 
 window.addEventListener('error', event => {
-  var element = event.target || event.srcElement;
-  if (element.tagName === 'SCRIPT') {
-    console.log("Found problematic script:", element);
-    if(element.alreadyChanged){
-      console.log("this script has already been injected, ignoring this problematic script...");
-      return;
+    var element = event.target || event.srcElement;
+    if (element.tagName === 'SCRIPT') {
+        console.log("Found problematic script:", element);
+        if (element.alreadyChanged) {
+            console.log("this script has already been injected, ignoring this problematic script...");
+            return;
+        }
+        // 调用 covToAbs 函数
+        removeIntegrityAttributesFromElement(element);
+        covToAbs(element);
+
+        // 创建新的 script 元素
+        var newScript = document.createElement("script");
+        newScript.src = element.src;
+        newScript.async = element.async; // 保留原有的 async 属性
+        newScript.defer = element.defer; // 保留原有的 defer 属性
+        newScript.alreadyChanged = true;
+
+        // 添加新的 script 元素到 document
+        document.head.appendChild(newScript);
+
+        console.log("New script added:", newScript);
     }
-    // 调用 covToAbs 函数
-    removeIntegrityAttributesFromElement(element);
-    covToAbs(element);
-
-    // 创建新的 script 元素
-    var newScript = document.createElement("script");
-    newScript.src = element.src;
-    newScript.async = element.async; // 保留原有的 async 属性
-    newScript.defer = element.defer; // 保留原有的 defer 属性
-    newScript.alreadyChanged = true;
-
-    // 添加新的 script 元素到 document
-    document.head.appendChild(newScript);
-
-    console.log("New script added:", newScript);
-  }
 }, true);
 console.log("WINDOW CORS ERROR EVENT ADDED");
-
-
 
 
 
@@ -1211,6 +1225,7 @@ async function handleRequest(request) {
 
 
   const response = await fetch(modifiedRequest);
+  console.log("upstream status: " + response.status + " url: " + actualUrlStr);
   if (response.status.toString().startsWith("3") && response.headers.get("Location") != null) {
     //console.log(base_url + response.headers.get("Location"))
     try {
