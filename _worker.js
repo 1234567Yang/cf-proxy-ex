@@ -246,7 +246,7 @@ function appendChildInject() {
 function elementPropertyInject() {
     const originalSetAttribute = HTMLElement.prototype.setAttribute;
     HTMLElement.prototype.setAttribute = function (name, value) {
-        if (name == "src" || name == "href") {
+        if (name == "src" || name == "href" || name == "action") {
             value = changeURL(value);
         }
         originalSetAttribute.call(this, name, value);
@@ -256,7 +256,7 @@ function elementPropertyInject() {
     const originalGetAttribute = HTMLElement.prototype.getAttribute;
     HTMLElement.prototype.getAttribute = function (name) {
         const val = originalGetAttribute.call(this, name);
-        if (name == "href" || name == "src") {
+        if (name == "src" || name == "href" || name == "action") {
             return getOriginalUrl(val);
         }
         return val;
