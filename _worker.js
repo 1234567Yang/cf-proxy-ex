@@ -1229,7 +1229,7 @@ async function handleRequest(request) {
   if (response.status.toString().startsWith("3") && response.headers.get("Location") != null) {
     //console.log(base_url + response.headers.get("Location"))
     try {
-      return getRedirect(thisProxyServerUrlHttps + new URL(response.headers.get("Location"), actualUrlStr).href);
+      return getRedirect(thisProxyServerUrlHttps + new URL(response.headers.get("Location"), actualUrlStr).href, response, actualUrl);
     } catch {
       getHTMLResponse(redirectError + "<br>the redirect url:" + response.headers.get("Location") + ";the url you are now at:" + actualUrlStr);
     }
@@ -1419,76 +1419,14 @@ async function handleRequest(request) {
 
 
 
+
+
+
+  
   // =======================================================================================
   // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 处理要返回的 Cookie Header *-*-*-*-*-*-*-*-*-*-*
   // =======================================================================================
-  let headers = modifiedResponse.headers;
-  let cookieHeaders = [];
-
-  // Collect all 'Set-Cookie' headers regardless of case
-  for (let [key, value] of headers.entries()) {
-    if (key.toLowerCase() == 'set-cookie') {
-      cookieHeaders.push({ headerName: key, headerValue: value });
-    }
-  }
-
-
-  if (cookieHeaders.length > 0) {
-    cookieHeaders.forEach(cookieHeader => {
-      let cookies = cookieHeader.headerValue.split(',').map(cookie => cookie.trim());
-
-      for (let i = 0; i < cookies.length; i++) {
-        let parts = cookies[i].split(';').map(part => part.trim());
-        //console.log(parts);
-
-        // Modify Path
-        let pathIndex = parts.findIndex(part => part.toLowerCase().startsWith('path='));
-        let originalPath;
-        if (pathIndex !== -1) {
-          originalPath = parts[pathIndex].substring("path=".length);
-        }
-        let absolutePath = "/" + new URL(originalPath, actualUrlStr).href;;
-
-        if (pathIndex !== -1) {
-          parts[pathIndex] = `Path=${absolutePath}`;
-        } else {
-          parts.push(`Path=${absolutePath}`);
-        }
-
-        // Modify Domain
-        let domainIndex = parts.findIndex(part => part.toLowerCase().startsWith('domain='));
-
-        if (domainIndex !== -1) {
-          parts[domainIndex] = `domain=${thisProxyServerUrl_hostOnly}`;
-        } else {
-          parts.push(`domain=${thisProxyServerUrl_hostOnly}`);
-        }
-
-        cookies[i] = parts.join('; ');
-      }
-
-      // Re-join cookies and set the header
-      headers.set(cookieHeader.headerName, cookies.join(', '));
-    });
-  }
-  //bd != null && bd.includes("<html")
-  if (isHTML && response.status == 200) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
-    let cookieValue = lastVisitProxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
-    //origin末尾不带/
-    //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
-    //origin: "https://www.baidu.com"
-    headers.append("Set-Cookie", cookieValue);
-
-    if (response.body && !hasProxyHintCook) { //response.body 确保是正常网页再设置cookie
-      //添加代理提示
-      const expiryDate = new Date();
-      expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24小时
-      var hintCookie = `${proxyHintCookieName}=1; expires=${expiryDate.toUTCString()}; path=/`;
-      headers.append("Set-Cookie", hintCookie);
-    }
-
-  }
-
+  handleCookieHeader(modifiedResponse, isHTML, response, actualUrlStr, actualUrl, hasProxyHintCook);
 
 
 
@@ -1560,6 +1498,81 @@ async function handleRequest(request) {
 
   return modifiedResponse;
 }
+
+
+
+function handleCookieHeader(modifiedResponse, isHTML, response, actualUrlStr, actualUrl, hasProxyHintCook) {
+  let headers = modifiedResponse.headers;
+  let cookieHeaders = [];
+
+  // Collect all 'Set-Cookie' headers regardless of case
+  for (let [key, value] of headers.entries()) {
+    if (key.toLowerCase() == 'set-cookie') {
+      cookieHeaders.push({ headerName: key, headerValue: value });
+    }
+  }
+
+
+  if (cookieHeaders.length > 0) {
+    cookieHeaders.forEach(cookieHeader => {
+      let cookies = cookieHeader.headerValue.split(',').map(cookie => cookie.trim());
+
+      for (let i = 0; i < cookies.length; i++) {
+        let parts = cookies[i].split(';').map(part => part.trim());
+        //console.log(parts);
+
+        // Modify Path
+        let pathIndex = parts.findIndex(part => part.toLowerCase().startsWith('path='));
+        let originalPath;
+        if (pathIndex !== -1) {
+          originalPath = parts[pathIndex].substring("path=".length);
+        }
+        let absolutePath = "/" + new URL(originalPath, actualUrlStr).href;;
+
+        if (pathIndex !== -1) {
+          parts[pathIndex] = `Path=${absolutePath}`;
+        } else {
+          parts.push(`Path=${absolutePath}`);
+        }
+
+        // Modify Domain
+        let domainIndex = parts.findIndex(part => part.toLowerCase().startsWith('domain='));
+
+        if (domainIndex !== -1) {
+          parts[domainIndex] = `domain=${thisProxyServerUrl_hostOnly}`;
+        } else {
+          parts.push(`domain=${thisProxyServerUrl_hostOnly}`);
+        }
+
+        cookies[i] = parts.join('; ');
+      }
+
+      // Re-join cookies and set the header
+      headers.set(cookieHeader.headerName, cookies.join(', '));
+    });
+  }
+  //bd != null && bd.includes("<html")
+  if (isHTML && response.status == 200) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+    let cookieValue = lastVisitProxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
+    //origin末尾不带/
+    //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
+    //origin: "https://www.baidu.com"
+    headers.append("Set-Cookie", cookieValue);
+
+    if (response.body && !hasProxyHintCook) { //response.body 确保是正常网页再设置cookie
+      //添加代理提示
+      const expiryDate = new Date();
+      expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24小时
+      var hintCookie = `${proxyHintCookieName}=1; expires=${expiryDate.toUTCString()}; path=/`;
+      headers.append("Set-Cookie", hintCookie);
+    }
+
+  }
+
+}
+
+
+
 
 //https://stackoverflow.com/questions/5142337/read-a-javascript-cookie-by-name
 function getCook(cookiename, cookies) {
@@ -1652,7 +1665,13 @@ function getHTMLResponse(html) {
   });
 }
 
-function getRedirect(url) {
+function getRedirect(url, originalResponse, actualUrl) {
+  if (originalResponse) {
+    var res = new Response(null, originalResponse);
+    handleCookieHeader(res, false, originalResponse, actualUrl.toString(),actualUrl,true)
+    res.headers.set("Location", url);
+    return res;
+  }
   return Response.redirect(url, 301);
 }
 
