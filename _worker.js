@@ -1503,72 +1503,68 @@ async function handleRequest(request) {
 
 function handleCookieHeader(modifiedResponse, isHTML, response, actualUrlStr, actualUrl, hasProxyHintCook) {
   let headers = modifiedResponse.headers;
-  let cookieHeaders = [];
-
-  // Collect all 'Set-Cookie' headers regardless of case
-  for (let [key, value] of headers.entries()) {
-    if (key.toLowerCase() == 'set-cookie') {
-      cookieHeaders.push({ headerName: key, headerValue: value });
-    }
+  
+  // ========== 修复：用 getAll 获取每个独立的 Set-Cookie ==========
+  // https://developers.cloudflare.com/workers/runtime-apis/headers/
+  // Despite the fact that the Headers.getAll method has been made obsolete in web browsers, Workers still provides this method for use with the Set-Cookie header. This is because cookies often contain date strings, which include commas. This can make parsing multiple values in a Set-Cookie header difficult.
+  // Any attempts to use Headers.getAll with other header names will throw an error. A brief history of Headers.getAll is available in this GitHub issue ↗.
+  // Cloudflare Workers 中 headers.entries() 会把多个 Set-Cookie 合并成逗号分隔的字符串
+  // 而 expires 日期也含逗号（如 "Sun, 29-Mar-2026"），导致按逗号分割时被破坏
+  let rawCookies = [];
+  try {
+    // Workers 支持 getAll('Set-Cookie')，返回数组
+    rawCookies = headers.getAll('Set-Cookie');
+  } catch {
+    // fallback: 如果不支持 getAll
+    const val = headers.get('Set-Cookie');
+    if (val) rawCookies = [val];
   }
 
+  if (rawCookies.length > 0) {
+    // 先删除原来的 Set-Cookie
+    headers.delete('Set-Cookie');
+    
+    rawCookies.forEach(singleCookie => {
+      let parts = singleCookie.split(';').map(part => part.trim());
 
-  if (cookieHeaders.length > 0) {
-    cookieHeaders.forEach(cookieHeader => {
-      let cookies = cookieHeader.headerValue.split(',').map(cookie => cookie.trim());
+      // Modify Path
+      let pathIndex = parts.findIndex(part => part.toLowerCase().startsWith('path='));
+      let originalPath;
+      if (pathIndex !== -1) {
+        originalPath = parts[pathIndex].substring("path=".length);
+      }
+      let absolutePath = "/" + new URL(originalPath, actualUrlStr).href;
 
-      for (let i = 0; i < cookies.length; i++) {
-        let parts = cookies[i].split(';').map(part => part.trim());
-        //console.log(parts);
-
-        // Modify Path
-        let pathIndex = parts.findIndex(part => part.toLowerCase().startsWith('path='));
-        let originalPath;
-        if (pathIndex !== -1) {
-          originalPath = parts[pathIndex].substring("path=".length);
-        }
-        let absolutePath = "/" + new URL(originalPath, actualUrlStr).href;;
-
-        if (pathIndex !== -1) {
-          parts[pathIndex] = `Path=${absolutePath}`;
-        } else {
-          parts.push(`Path=${absolutePath}`);
-        }
-
-        // Modify Domain
-        let domainIndex = parts.findIndex(part => part.toLowerCase().startsWith('domain='));
-
-        if (domainIndex !== -1) {
-          parts[domainIndex] = `domain=${thisProxyServerUrl_hostOnly}`;
-        } else {
-          parts.push(`domain=${thisProxyServerUrl_hostOnly}`);
-        }
-
-        cookies[i] = parts.join('; ');
+      if (pathIndex !== -1) {
+        parts[pathIndex] = `Path=${absolutePath}`;
+      } else {
+        parts.push(`Path=${absolutePath}`);
       }
 
-      // Re-join cookies and set the header
-      headers.set(cookieHeader.headerName, cookies.join(', '));
+      // Modify Domain
+      let domainIndex = parts.findIndex(part => part.toLowerCase().startsWith('domain='));
+      if (domainIndex !== -1) {
+        parts[domainIndex] = `domain=${thisProxyServerUrl_hostOnly}`;
+      } else {
+        parts.push(`domain=${thisProxyServerUrl_hostOnly}`);
+      }
+
+      // 用 append 而不是 set，确保多个 Set-Cookie 不会互相覆盖
+      headers.append('Set-Cookie', parts.join('; '));
     });
   }
-  //bd != null && bd.includes("<html")
-  if (isHTML && response.status == 200) { //如果是HTML再加cookie，因为有些网址会通过不同的链接添加CSS等文件
+
+  if (isHTML && response.status == 200) {
     let cookieValue = lastVisitProxyCookie + "=" + actualUrl.origin + "; Path=/; Domain=" + thisProxyServerUrl_hostOnly;
-    //origin末尾不带/
-    //例如：console.log(new URL("https://www.baidu.com/w/s?q=2#e"));
-    //origin: "https://www.baidu.com"
     headers.append("Set-Cookie", cookieValue);
 
-    if (response.body && !hasProxyHintCook) { //response.body 确保是正常网页再设置cookie
-      //添加代理提示
+    if (response.body && !hasProxyHintCook) {
       const expiryDate = new Date();
-      expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24小时
+      expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000);
       var hintCookie = `${proxyHintCookieName}=1; expires=${expiryDate.toUTCString()}; path=/`;
       headers.append("Set-Cookie", hintCookie);
     }
-
   }
-
 }
 
 
