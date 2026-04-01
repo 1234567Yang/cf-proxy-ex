@@ -800,7 +800,7 @@ function ${htmlCovPathInjectFuncName}(htmlString) {
 
   let charset = modifiedHtml.match(/content="text\\/html;\\s*charset=[^"]*"/);
   console.log(charset);
-  if(charset.length !== 0){
+  if(charset != null && charset.length !== 0){
     modifiedHtml = modifiedHtml.replace(charset[0], "content='text/html;charset=utf-8'");
     // only replace the first here
   }
