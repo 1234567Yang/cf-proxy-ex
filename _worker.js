@@ -119,13 +119,13 @@ function changeURL(relativePath) {
         enhancedStartRm.forEach(x => {
             x = "/" + x;
             if (relativePath_str.startsWith(x)) relativePath_str = relativePath_str.substring(x.length);
-            console.log("Replacing: " + x + "   The replaced: " + relativePath_str);
+            // console.log("Replacing: " + x + "   The replaced: " + relativePath_str);
         });
     } catch {
         //ignore
     }
     try {
-        console.log("relativePath_str: " + relativePath_str + "; original_website_url_str: " + original_website_url_str);
+        // console.log("relativePath_str: " + relativePath_str + "; original_website_url_str: " + original_website_url_str);
         var absolutePath = new URL(relativePath_str, original_website_url_str).href; //获取绝对路径
         absolutePath = absolutePath.replaceAll(window.location.href, original_website_url_str); //可能是参数里面带了当前的链接，需要还原原来的链接防止403
         absolutePath = absolutePath.replaceAll(encodeURI(window.location.href), encodeURI(original_website_url_str));
@@ -795,7 +795,16 @@ function ${htmlCovPathInjectFuncName}(htmlString) {
 
   
   // Get the modified HTML string
-  const modifiedHtml = tempDoc.documentElement.outerHTML;
+  let modifiedHtml = tempDoc.documentElement.outerHTML;
+
+
+  let charset = modifiedHtml.match(/content="text\\/html;\\s*charset=[^"]*"/);
+  console.log(charset);
+  if(charset.length !== 0){
+    modifiedHtml = modifiedHtml.replace(charset[0], "content='text/html;charset=utf-8'");
+    // only replace the first here
+  }
+
   
   // Now use document.open/write/close to replace the entire document
   // This preserves the natural script execution order
@@ -1258,8 +1267,42 @@ async function handleRequest(request) {
     // =======================================================================================
     // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果 Body 是 Text *-*-*-*-*-*-*-*-*-*-*-*-*-*-*
     // =======================================================================================
+
     if (contentType && contentType.startsWith("text/")) {
-      bd = await response.text();
+      
+      const rawBytes = await response.arrayBuffer(); 
+      let encoding = 'utf-8';
+      console.log("content type: " + contentType)
+      if (contentType) {
+          let m = contentType.match(/charset=([^\s;]+)/i);
+          // [0: "charset=gb2312", 1: "gb2312"]
+          if (m){
+            console.log(m);
+            encoding = m[1];
+          }else if (contentType.includes("text/html")) {
+            // 先读取text，找content="*;\s*charset=gb2312" 
+            // 用 latin1 预读前面一小段，因为 meta 标签是 ASCII，任何编码下都能正确读取
+            let preview = new TextDecoder('utf-8').decode(rawBytes.slice(0, 1024 * 2));
+            let metaMatch = preview.match(/charset\s*=\s*["']?\s*([^\s"';>]+)/i);
+            if (metaMatch) {
+              encoding = metaMatch[1];
+              console.log("Detected charset from meta: " + encoding);
+            }
+          }
+      }
+      console.log(encoding);
+      try{
+        bd = new TextDecoder(encoding).decode(rawBytes);
+      }catch(ex){
+        console.log(ex);
+        bd = new TextDecoder('utf-8').decode(rawBytes);
+      }
+
+      // console.log(bd);
+      // bd = await response.text();
+      // .text() 会默认用utf-8
+      // 如果网站用了gb2312就乱码
+      // 同时有些网站不会在header放content type，会放body里面，只能先临时解码一下，然后再正式解码
 
 
       isHTML = (contentType && contentType.includes("text/html") && bd.includes("<html"));
@@ -1443,6 +1486,10 @@ async function handleRequest(request) {
 
   modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
   modifiedResponse.headers.set("X-Frame-Options", "ALLOWALL");
+
+
+  // 文档编码
+  modifiedResponse.headers.set("Content-Type", contentType.replace(/charset=([^\s;]+)/i, "charset=utf-8"));
 
 
   /* 
