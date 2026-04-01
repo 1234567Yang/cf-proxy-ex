@@ -1268,7 +1268,11 @@ async function handleRequest(request) {
     // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 如果 Body 是 Text *-*-*-*-*-*-*-*-*-*-*-*-*-*-*
     // =======================================================================================
 
-    if (contentType && contentType.startsWith("text/")) {
+    // TODO: BUG：如果是加载了一个gb2515的界面，然后里面有application/javascript，然后js也是gb2515，但是它header里面没有，就会乱码
+    let isText = false;
+    let isTextDetectingKeyword = ["text/", "application/json", "application/javascript"]
+    isTextDetectingKeyword.forEach(x => {if(contentType.includes(x)) isText = true;})
+    if (contentType && isText) {
       
       const rawBytes = await response.arrayBuffer(); 
       let encoding = 'utf-8';
@@ -1298,7 +1302,7 @@ async function handleRequest(request) {
         bd = new TextDecoder('utf-8').decode(rawBytes);
       }
 
-      // console.log(bd);
+      console.log(bd);
       // bd = await response.text();
       // .text() 会默认用utf-8
       // 如果网站用了gb2312就乱码
@@ -1443,6 +1447,9 @@ async function handleRequest(request) {
 
 
       modifiedResponse = new Response(bd, response);
+
+      // 文档编码
+      modifiedResponse.headers.set("Content-Type", contentType.replace(/charset=([^\s;]+)/i, "charset=utf-8"));
     }
 
     // =======================================================================================
@@ -1488,9 +1495,9 @@ async function handleRequest(request) {
   modifiedResponse.headers.set("X-Frame-Options", "ALLOWALL");
 
 
-  // 文档编码
-  modifiedResponse.headers.set("Content-Type", contentType.replace(/charset=([^\s;]+)/i, "charset=utf-8"));
-
+  // // 文档编码
+  // modifiedResponse.headers.set("Content-Type", contentType.replace(/charset=([^\s;]+)/i, "charset=utf-8"));
+  // 这个放进 text 判断那里，因为如果不是 text 的话设置这个可能会反而导致编码错误
 
   /* 
   Cross-Origin-Opener-Policy感觉不需要
