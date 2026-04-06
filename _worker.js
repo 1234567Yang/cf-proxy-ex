@@ -1271,8 +1271,8 @@ async function handleRequest(request) {
     // TODO: BUG：如果是加载了一个gb2515的界面，然后里面有application/javascript，然后js也是gb2515，但是它header里面没有，就会乱码
     let isText = false;
     let isTextDetectingKeyword = ["text/", "application/json", "application/javascript"]
-    isTextDetectingKeyword.forEach(x => {if(contentType.includes(x)) isText = true;})
-    if (contentType && isText) {
+    isTextDetectingKeyword.forEach(x => {if(contentType && contentType.includes(x)) isText = true;})
+    if (isText) { // contentType && 在上面已经有了
       
       const rawBytes = await response.arrayBuffer(); 
       let encoding = 'utf-8';
