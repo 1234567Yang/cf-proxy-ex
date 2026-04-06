@@ -70,7 +70,7 @@ var original_website_host_with_schema = original_website_url_str.substring(0, or
 function changeURL(relativePath) {
     if (relativePath == null) return null;
 
-    relativePath_str = "";
+    let relativePath_str = "";
     if (relativePath instanceof URL) {
         relativePath_str = relativePath.href;
     } else {
