@@ -475,6 +475,9 @@ function windowLocationInject() {
 function historyInject() {
     const originalPushState = History.prototype.pushState;
     const originalReplaceState = History.prototype.replaceState;
+    const originalBack = History.prototype.back;
+    const originalForward = History.prototype.forward;
+    const originalGo = History.prototype.go;
 
     History.prototype.pushState = function (state, title, url) {
         if (!url) return; //x.com 会有一次undefined
