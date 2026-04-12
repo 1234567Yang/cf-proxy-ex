@@ -820,12 +820,11 @@ function ${htmlCovPathInjectFuncName}(htmlString) {
 
 
 function replaceContentPaths(content){
-  // ChatGPT 替换里面的链接
-  let regex = new RegExp(\`(?<!src="|href=")(https?:\\\\/\\\\/[^\s'"]+)\`, 'g');
+  let regex = new RegExp(\`(https?:\\\\/\\\\/[^\s'"]+)\`, 'g');
   // 这里写四个 \ 是因为 Server side 的文本也会把它当成转义符
-
-
   content = content.replaceAll(regex, (match) => {
+    if (match.startsWith("http://www.w3.org/") || match.startsWith("https://www.w3.org/")) return match; // w3范式
+    
     if (match.startsWith("http")) {
       return proxy_host_with_schema + match;
     } else {
@@ -1432,8 +1431,10 @@ async function handleRequest(request) {
       // =======================================================================================
       else {
         //ChatGPT 替换里面的链接
-        let regex = new RegExp(`(?<!src="|href=")(https?:\\/\\/[^\s'"]+)`, 'g');
+        // (?<!src="|href=")()
+        let regex = new RegExp(`(https?:\\/\\/[^\s'"]+)`, 'g');
         bd = bd.replaceAll(regex, (match) => {
+          if (match.startsWith("http://www.w3.org/") || match.startsWith("https://www.w3.org/")) return match; // w3范式
           if (match.startsWith("http")) {
             return thisProxyServerUrlHttps + match;
           } else {
