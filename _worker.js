@@ -1,9 +1,20 @@
-addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-  thisProxyServerUrlHttps = `${url.protocol}//${url.hostname}/`;
-  thisProxyServerUrl_hostOnly = url.host;
-  event.respondWith(handleRequest(event.request))
-})
+export default {
+  async fetch(req) {
+    const url = new URL(req.url);
+    thisProxyServerUrlHttps = `${url.protocol}//${url.hostname}/`;
+    thisProxyServerUrl_hostOnly = url.host;
+    return handleRequest(req);
+  }
+};
+
+if (typeof Deno !== 'undefined' && Deno.serve) {
+  Deno.serve((req) => {
+    const url = new URL(req.url);
+    thisProxyServerUrlHttps = `${url.protocol}//${url.hostname}/`;
+    thisProxyServerUrl_hostOnly = url.host;
+    return handleRequest(req);
+  });
+}
 
 
 const str = "/";
