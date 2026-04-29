@@ -14,7 +14,7 @@
 * 将`addEventListener`那一块替换为以下代码：
 
 ```
-Deno.serve((req: Request) => {
+Deno.serve((req) => {
     const url = new URL(req.url);
     thisProxyServerUrlHttps = `${url.protocol}//${url.hostname}/`;
     thisProxyServerUrl_hostOnly = url.host;
