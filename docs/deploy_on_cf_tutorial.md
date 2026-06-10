@@ -10,9 +10,8 @@
 
 # 步骤
 
-* 登录https://dash.cloudflare.com/
-* 按照以下步骤设置：
-
+- 登录https://dash.cloudflare.com/
+- 按照以下步骤设置：
 
 ![0](../img/deploy/cf/0.png)
 
@@ -51,7 +50,6 @@
 ## 你也可以添加自定义域名
 
 ![6](../img/deploy/cf/6.png)
-
 
 > [!TIP]
 > 如果你选择不开启安全密码，那么你可以转到 Website -> Security -> Bots -> 开启所有防护（Bot Fight Mode + Block AI bots）

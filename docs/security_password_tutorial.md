@@ -15,11 +15,12 @@ const password
 ![密码](../img/deploy/pwd.png)
 
 ## 如果选择打开`showPwdPage`，那么可以直接输入密码（有效期1周），无需后续步骤。
+
 默认打开 `showPwdPage`。
 
 ## 打开开发者工具（Dev tool），转到程序->Cookie->双击新建Cookie
 
-
 ### 如果想设置临时Cookie的话可以控制台（Console）输入：
+
 `document.cookie += "__PROXY_PWD__=your_password; path=/; domain=your_domain`
 注意替换`your_password`和`your_domain`。
