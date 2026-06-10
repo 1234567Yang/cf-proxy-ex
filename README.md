@@ -46,7 +46,7 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 # 快速开始
 * 在 1.4 版本后启动了默认[安全密码](#安全密码)，默认密码为 `123`，感谢 <ruby>Bolster<rp>（</rp><rt>da sha bi</rt><rp>）</rp></ruby> 给我整不会了。
 
-![bolster](https://github.com/1234567Yang/cf-proxy-ex/blob/main/img/depoly/abuse_report.png)
+![bolster](img/deploy/abuse_report.png)
 
 * [在Deno上部署](docs/deploy_on_deno_tutorial.md)
 * [在Cloudflare上部署](docs/deploy_on_cf_tutorial.md)

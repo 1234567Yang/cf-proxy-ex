@@ -12,7 +12,7 @@
 const password
 ```
 
-![密码](../img/depoly/pwd.png)
+![密码](../img/deploy/pwd.png)
 
 ## 如果选择打开`showPwdPage`，那么可以直接输入密码（有效期1周），无需后续步骤。
 默认打开 `showPwdPage`。

@@ -5,11 +5,11 @@
 
 * 点击“New playground"
 
-![New playground](../img/depoly/deno/deno1.png)
+![New playground](../img/deploy/deno/deno1.png)
 
 * 把worker.js文件中的内容复制进去
 
-![保存并部署](../img/depoly/deno/deno2.png)
+![保存并部署](../img/deploy/deno/deno2.png)
 
 * 将`addEventListener`那一块替换为以下代码：
 
