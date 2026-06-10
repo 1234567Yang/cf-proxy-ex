@@ -2,8 +2,8 @@
 
 <div align="center">
   
-[中文](https://github.com/1234567Yang/cf-proxy-ex/blob/main/usage_tips.md) 
-[English](https://github-com.translate.goog/1234567Yang/cf-proxy-ex/blob/main/usage_tips.md?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_hl=zh-CN&_x_tr_pto=wapp)
+[中文](https://github.com/1234567Yang/cf-proxy-ex/blob/main/docs/usage_tips.md) 
+[English](https://github-com.translate.goog/1234567Yang/cf-proxy-ex/blob/main/docs/usage_tips.md?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_hl=zh-CN&_x_tr_pto=wapp)
 </div>
 
 

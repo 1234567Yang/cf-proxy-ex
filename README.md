@@ -40,7 +40,7 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 # 用法
 * 请先根据 [快速开始](#快速开始) 进行部署
 * 在任意网址前面加上 `https://你的域名/` <br>例如 `https://你的域名/https://github.com`
-* [使用技巧](https://github.com/1234567Yang/cf-proxy-ex/blob/main/usage_tips.md)
+* [使用技巧](docs/usage_tips.md)
 
 
 # 快速开始
@@ -48,8 +48,8 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 
 ![bolster](https://github.com/1234567Yang/cf-proxy-ex/blob/main/img/depoly/abuse_report.png)
 
-* [在Deno上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_deno_tutorial.md)
-* [在Cloudflare上部署](https://github.com/1234567Yang/cf-proxy-ex/blob/main/deploy_on_cf_tutorial.md)
+* [在Deno上部署](docs/deploy_on_deno_tutorial.md)
+* [在Cloudflare上部署](docs/deploy_on_cf_tutorial.md)
 * 自定义域名获取（可选但建议，更稳定）：
   * 域名购买：
     * https://porkbun.com/
@@ -60,11 +60,11 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 > 设置子域名的时候，请不要设置成类似于`proxy.example.com`的格式，因为在TLS握手的时候（会明文发送SNI），很容易被识别出这是一个代理服务。建议使用看起来更常规、无 / 假 特定含义的子域名，例如 `cdn.example.com` 或 `img.example.com` 等，以降低被识别的风险。
 
 > [!NOTE]  
-> 如果部署失败（重定向、报错 等），请参考 [FAQ](FAQ.md)
+> 如果部署失败（重定向、报错 等），请参考 [FAQ](docs/FAQ.md)
 
 # 安全密码
 安全密码利用Cookie，在设置了密码的情况下，会先检测是否有密码Cookie以及是否正确，如果不正确那么可以设置输入密码界面，或者直接403。密码Cookie默认名称为`passwordCookieName`，设置密码可以代码里搜索`const password = "";`并替换成你的密码。
-更详细的教程可以[点这里](https://github.com/1234567Yang/cf-proxy-ex/blob/main/security_password_tutorial.md)。
+更详细的教程可以[点这里](docs/security_password_tutorial.md)。
 
 # 截图
 ![Duckduckgo](img/duckduckgo.jpg)
