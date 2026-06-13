@@ -1,0 +1,16 @@
+{
+  "name": "cf-proxy-ex",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "fmt": "oxfmt"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxfmt": "0.54.0",
+    "oxlint": "1.69.0",
+    "oxlint-tsgolint": "0.23.0",
+    "typescript": "6.0.3",
+    "wrangler": "^4.99.0"
+  }
+}

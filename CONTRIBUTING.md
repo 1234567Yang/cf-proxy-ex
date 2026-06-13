@@ -4,6 +4,6 @@
 - **Contributing to this project means you agree with the license** and will not add any additional copyright notices, contact information, or claims within the code.
 - **NO VIBE CODING ALLOWED**
 
-
 Some things I want you to help with (because I am too lazy):
-* Any active issue that is currently in `Todo`
+
+- Any active issue that is currently in `Todo`
