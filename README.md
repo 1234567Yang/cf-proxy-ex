@@ -97,4 +97,4 @@ MIT License + 一些条件<br>
 <!--* ~~非常非常非常感谢为我未来着想的学校管理员，把好多正常网站屏蔽了，否则这个项目就不存在了。此外，非常非常非常感谢学校管理员是让这个项目存在的原因（之一），能让我写在 College App 上~~-->
 
 # Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=1234567Yang/cf-proxy-ex&type=Date)](https://star-history.com/#1234567Yang/cf-proxy-ex&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=1234567Yang/cf-proxy-ex&type=Date)](https://star-history.dera.page/#1234567Yang/cf-proxy-ex&Date)
