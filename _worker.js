@@ -1121,7 +1121,7 @@ async function handleRequest(request) {
   // =======================================================================================
 
 
-  const userAgent = request.headers.get('User-Agent');
+  const userAgent = request.headers.get('User-Agent') || "";
   if (userAgent.includes("Bytespider")) {
     return getHTMLResponse("0");
     //污染bytespider的结果（AI训练/搜索），这爬虫不遵循robots.txt
@@ -1132,7 +1132,7 @@ async function handleRequest(request) {
   // =======================================================================================
 
   //获取所有cookie
-  var siteCookie = request.headers.get('Cookie');
+  var siteCookie = request.headers.get('Cookie') || "";
 
 
   if (password != "") {
