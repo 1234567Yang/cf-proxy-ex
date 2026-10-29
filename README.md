@@ -45,6 +45,7 @@ https://y.demo.lhyang.org/https://www.google.com/maps
 
 # 快速开始
 * 在 1.4 版本后启动了默认[安全密码](#安全密码)，默认密码为 `123`，感谢 <ruby>Bolster<rp>（</rp><rt>da sha bi</rt><rp>）</rp></ruby> 给我整不会了。
+* 再次提醒，我强烈建议开启密码，如果关闭密码，不仅会被限速，而且你将会和我一样，天天被 UserAgent: Bot* 轰炸，两三天一封侵权邮件，Google 反钓鱼发邮件，一堆莫名其妙的 SEO 砖家发邮件……
 
 ![bolster](https://github.com/1234567Yang/cf-proxy-ex/blob/main/img/depoly/abuse_report.png)
 
