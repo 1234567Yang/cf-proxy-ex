@@ -116,7 +116,8 @@ function changeURL(relativePath) {
 
 
     try {
-        if (relativePath_str.startsWith("data:") || relativePath_str.startsWith("mailto:") || relativePath_str.startsWith("javascript:") || relativePath_str.startsWith("chrome") || relativePath_str.startsWith("edge")) return relativePath_str;
+      if (/^(blob|data|about|javascript|mailto|tel|sms|chrome|edge|chrome-extension|moz-extension):/i.test(relativePath_str))
+        return relativePath_str;
     } catch {
         console.log("Change URL Error **************************************:");
         console.log(relativePath_str);
@@ -127,12 +128,9 @@ function changeURL(relativePath) {
 
 
     // for example, blob:https://example.com/, we need to remove blob and add it back later
+    // this is just a placeholder for now, blob is already validated above
+    // blob URL 不是一个能去服务器请求的地址，它只是浏览器内存里一张登记表的键。调用 URL.createObjectURL() 时，浏览器把这个 Blob 登记在当前页面的源下，生成一个带源前缀的地址。只有一字不差地拿这个地址去查，才能查到。
     var pathAfterAdd = "";
-
-    if (relativePath_str.startsWith("blob:")) {
-        pathAfterAdd = "blob:";
-        relativePath_str = relativePath_str.substring("blob:".length);
-    }
 
 
     try {
