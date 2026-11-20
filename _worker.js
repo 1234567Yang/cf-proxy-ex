@@ -1304,8 +1304,8 @@ async function handleRequest(request) {
 
     var newValue = value.replaceAll(thisProxyServerUrlHttps + "http", "http");
     // 无论如何，https://proxy.com 都不应该作为https://proxy.comhttps://original出现在header中，即使是在paramter里面，改为http也只会变为原先的URL
-    newValue = newValue.replaceAll(thisProxyServerUrlHttps, `${actualUrl.protocol}//${actualUrl.origin}/`); // 这是最后带 / 的
-    newValue = newValue.replaceAll(thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1), `${actualUrl.protocol}//${actualUrl.origin}`); // 这是最后不带 / 的
+    newValue = newValue.replaceAll(thisProxyServerUrlHttps, actualUrl.origin} + "/"); // 这是最后带 / 的
+    newValue = newValue.replaceAll(thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1), actualUrl.origin); // 这是最后不带 / 的
     newValue = newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host); // 仅替换 host
 
     // 2. 在发送到目标服务器前，剔除代理自身的 Cookie（如密码、访问记录、提示状态），防止隐私与密码泄漏
