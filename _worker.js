@@ -1292,15 +1292,37 @@ async function handleRequest(request) {
   // =======================================================================================
 
   let clientHeaderWithChange = new Headers();
-  //***代理发送数据的Header：修改部分header防止403 forbidden，要先修改，   因为添加Request之后header是只读的（***ChatGPT，未测试）
+  const proxyCookies = [lastVisitProxyCookie, passwordCookieName, proxyHintCookieName];
+  // const leakHeaders = ["cf-connecting-ip", "x-forwarded-for", "x-real-ip", "cf-ipcountry", "cf-ray", "cf-visitor"];
+
+  // Remove proxyCookies
   request.headers.forEach((value, key) => {
+    const lowerKey = key.toLowerCase();
+
+    // 过滤掉 Cloudflare 添加的请求头，防止真实 IP 和地理位置泄漏给目标网站
+    // if (leakHeaders.includes(lowerKey)) return;
+    // This is out of our control, commenting out
+
     var newValue = value.replaceAll(thisProxyServerUrlHttps + "http", "http");
-    //无论如何，https://proxy.com/ 都不应该作为https://proxy.com/https://original出现在header中，即使是在paramter里面，改为http也只会变为原先的URL
-    var newValue = newValue.replaceAll(thisProxyServerUrlHttps, actualUrl.origin} + "/"); // 这是最后带 / 的
-    var newValue = newValue.replaceAll(thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1), actualUrl.origin); // 这是最后不带 / 的
-    var newValue = newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host); // 仅替换 host
+    // 无论如何，https://proxy.com 都不应该作为https://proxy.comhttps://original出现在header中，即使是在paramter里面，改为http也只会变为原先的URL
+    newValue = newValue.replaceAll(thisProxyServerUrlHttps, actualUrl.origin + "/"); // 这是最后带 / 的
+    newValue = newValue.replaceAll(thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1), actualUrl.origin); // 这是最后不带 / 的
+    newValue = newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host); // 仅替换 host
+
+    // 2. Remove leakHeaders
+    if (lowerKey === "cookie") {
+      newValue = newValue
+        .split(';')
+        .map(c => c.trim())
+        .filter(c => c && !proxyCookies.some(p => c.startsWith(p + "=")))
+        .join('; ');
+      // 如果过滤后 Cookie 为空，则直接跳过，避免发送空的 Cookie 请求头
+      if (!newValue) return;
+    }
+
     clientHeaderWithChange.set(key, newValue);
   });
+
 
   // =======================================================================================
   // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 处理客户端发来的 Body *-*-*-*-*-*-*-*-*-*-*-*-*-*
