@@ -1309,7 +1309,7 @@ async function handleRequest(request) {
     newValue = newValue.replaceAll(thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1), actualUrl.origin); // 这是最后不带 / 的
     newValue = newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host); // 仅替换 host
 
-    // 2. 在发送到目标服务器前，剔除代理自身的 Cookie（如密码、访问记录、提示状态），防止隐私与密码泄漏
+    // 2. Remove leakHeaders
     if (lowerKey === "cookie") {
       newValue = newValue
         .split(';')
