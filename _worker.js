@@ -666,18 +666,10 @@ function traverseAndConvert(node, seen) {
 
 
 // 【convertAttr：改写元素的某一个属性】
-// 参数：element 是要处理的元素，name 是属性名，converter 是转换函数（changeURL 或 convertSrcset）。
-// 为什么必须"值没变就不写"：
-// 我们监视了属性修改，而我们自己调用 setAttribute 也算一次属性修改。
-// 如果不管值有没有变都写回去，就会出现：
-//   写入 → 触发 attributes 变动 → 回调里再次处理 → 又写入 → 又触发 …… 无限循环，页面卡死。
-// 所以先读出原值，转换后和原值比较，只有真的不同才写入。
-// 第二次进来时，原值已经是转换后的地址，再转换一次结果相同，于是不再写入，循环自然停止。
 function convertAttr(element, name, converter) {
     if (!element.hasAttribute(name)) return;
 
     // 必须用原生 getAttribute。hook 版会剥掉代理前缀，读出来的永远是"未改写"的样子，
-    // 和转换结果比较永远不相等，又会回到无限循环。
     const raw = rawGetAttr.call(element, name);
 
     let newVal;
@@ -690,44 +682,28 @@ function convertAttr(element, name, converter) {
     // 转换失败（返回 null）或者不需要改（已经是代理地址、data: 地址等），都不写入
     if (newVal == null || newVal === raw) return;
 
-    // 用原生 setAttribute 写入。值已经转换过了，如果走 hook 版，src / href / action 会被重复转换一次。
     rawSetAttr.call(element, name, newVal);
 }
 
 
-// 【convertSrcset：改写 srcset 属性里的每一个图片地址】
-//
-// img 标签除了 src，还可以用 srcset 给出好几张候选图片，让浏览器根据屏幕清晰度或宽度自己挑一张：
-//
-//     <img src="/a.png" srcset="/small.png 1x, /big.png 2x">
-//
-// 意思是普通屏幕用 small.png，高清屏用 big.png。后面的 1x、2x（也可以是 300w 这种宽度）叫描述符。
-// 浏览器只要看到 srcset，就会优先用它，而不是 src。
-// 所以如果只改了 src、没改 srcset，图片照样会请求错误的地址。
-//
-// 为什么不能偷懒：
-//   - 把整个字符串交给 changeURL：changeURL 会把它当成一个地址，空格被编码成 %20，得到一个坏链接。
-//     原来的代码对 source 标签就是这么处理的。
-//   - 直接按逗号 split(",")：URL 本身可能带逗号，比如 data:image/png;base64,AAAA，
-//     或者 CDN 的 w_100,h_100 这类参数，一切就断了。
-//
-// 正确的拆法（按 HTML 规范）：URL 是一段连续的非空白字符，里面不能有空格，但可以有逗号；
-// URL 后面跟一个可选的描述符；候选之间用逗号分隔。
-// 所以从左到右扫描，每次处理一个候选：
-//   1. 跳过开头的空格和逗号。
-//   2. 往后读，直到遇到空白为止，这一段就是 URL。
-//   3. 如果这段 URL 以逗号结尾，说明这个候选没有描述符，把结尾的逗号去掉即可。
-//   4. 否则继续读到下一个逗号，中间的部分就是描述符（1x、300w）。
-//   5. 用 changeURL 转换 URL，再把描述符原样拼回去。
-// 全部处理完后，用 ", " 把各个候选重新连起来。
-//
-// 例子（代理地址为 https://proxy.com/，当前页面为 https://example.com/dir/page）：
+// ************************************************************************
+// ************************************************************************
+// img srcset
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images
+// and link secret
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLLinkElement/imageSrcset
+// ************************************************************************
+// ************************************************************************
+
+
 //   输入："/s1.png 1x, https://cdn.x.com/s2.png 2x"
 //   输出："https://proxy.com/https://example.com/s1.png 1x, https://proxy.com/https://cdn.x.com/s2.png 2x"
 //
 //   输入："data:image/png;base64,AAAA 1x, img/w_100,h_100/b.png 2x"
 //   输出："data:image/png;base64,AAAA 1x, https://proxy.com/https://example.com/dir/img/w_100,h_100/b.png 2x"
 //   （data: 地址由 changeURL 原样返回；第二个地址里的逗号属于 URL 本身，不会被拆开）
+
+// Function by: Claude, haven't review yet
 function convertSrcset(srcset) {
     // 判断一个字符是不是空白（空格、换行、制表符等）。
     // 一般会写成正则的空白匹配符，但那需要反斜杠，在模板字符串里会被吃掉，
@@ -773,8 +749,6 @@ function convertSrcset(srcset) {
 
 
 // 【covToAbs：改写一个元素上所有需要走代理的地址属性】
-// 函数名和参数与原来相同，所以 parseAndInsertDoc 和 window 的 error 处理里对它的调用都不用改。
-// 改成调用 convertAttr 之后，值没变就不会写入，可以安全地被 MutationObserver 反复调用。
 function covToAbs(element) {
     // SVG 等非 HTML 元素不在这里处理
     if (!(element instanceof HTMLElement)) return;
@@ -808,22 +782,17 @@ function covToAbs(element) {
 
 
 
-
-
-// ************************************************************************
-// ************************************************************************
-// img srcset
-// https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images
-// and link secret
-// https://developer.mozilla.org/en-US/docs/Web/API/HTMLLinkElement/imageSrcset
-// ************************************************************************
-// ************************************************************************
-
 function removeIntegrityAttributesFromElement(element) {
     if (element.hasAttribute('integrity')) {
         element.removeAttribute('integrity');
     }
 }
+
+
+
+
+
+
 //---***========================================***---Hook观察界面里面要用到的func---***========================================***---
 function loopAndConvertToAbs() {
     for (var ele of document.querySelectorAll('*')) {
