@@ -1293,18 +1293,19 @@ async function handleRequest(request) {
 
   let clientHeaderWithChange = new Headers();
   const proxyCookies = [lastVisitProxyCookie, passwordCookieName, proxyHintCookieName];
-  const leakHeaders = ["cf-connecting-ip", "x-forwarded-for", "x-real-ip", "cf-ipcountry", "cf-ray", "cf-visitor"];
+  // const leakHeaders = ["cf-connecting-ip", "x-forwarded-for", "x-real-ip", "cf-ipcountry", "cf-ray", "cf-visitor"];
 
-  //***代理发送数据的Header：修改部分header防止403 forbidden，并过滤敏感信息防止泄漏
+  // Remove proxyCookies
   request.headers.forEach((value, key) => {
     const lowerKey = key.toLowerCase();
 
-    // 1. 过滤掉 Cloudflare 添加的请求头，防止真实 IP 和地理位置泄漏给目标网站
-    if (leakHeaders.includes(lowerKey)) return;
+    // 过滤掉 Cloudflare 添加的请求头，防止真实 IP 和地理位置泄漏给目标网站
+    // if (leakHeaders.includes(lowerKey)) return;
+    // This is out of our control, commenting out
 
     var newValue = value.replaceAll(thisProxyServerUrlHttps + "http", "http");
     // 无论如何，https://proxy.com 都不应该作为https://proxy.comhttps://original出现在header中，即使是在paramter里面，改为http也只会变为原先的URL
-    newValue = newValue.replaceAll(thisProxyServerUrlHttps, actualUrl.origin} + "/"); // 这是最后带 / 的
+    newValue = newValue.replaceAll(thisProxyServerUrlHttps, actualUrl.origin + "/"); // 这是最后带 / 的
     newValue = newValue.replaceAll(thisProxyServerUrlHttps.substring(0, thisProxyServerUrlHttps.length - 1), actualUrl.origin); // 这是最后不带 / 的
     newValue = newValue.replaceAll(thisProxyServerUrl_hostOnly, actualUrl.host); // 仅替换 host
 
